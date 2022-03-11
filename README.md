@@ -1,6 +1,9 @@
 # PowerPIC Project Files
 
-## Hardware
+## [Firmware](firmware/README.md)
+Firmware will be written in C and compiled with Microchip's `xc8` compiler.
+
+## [Hardware](hardware/)
 
 **Version 1.1**
 - Switched buzzer from RF0 to RG7 so we can use the PWM peripherial
@@ -12,5 +15,4 @@
  - First hardware version
 
 
-
- Thanks to Travis for the [Goodwatch](https://github.com/travisgoodspeed/goodwatch) and nice Casio CA-53W board footprints.
+ *Thanks to Travis for the [Goodwatch](https://github.com/travisgoodspeed/goodwatch) and nice Casio CA-53W board footprints.*

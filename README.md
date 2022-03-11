@@ -1,6 +1,6 @@
 # PowerPIC Project Files
 
-## [Firmware](firmware/README.md)
+## [Firmware](firmware/)
 Firmware will be written in C and compiled with Microchip's `xc8` compiler.
 
 ## [Hardware](hardware/)

@@ -1,5 +1,6 @@
 # PowerOS #
-Firmware for the PowerPIC Computer Watch. Checkout [rexploits.com/powerpic](rexploits.com/powerpic)
+Firmware for the PowerPIC Computer Watch. Checkout 
+[rexploits.com/powerpic](https://rexploits.com/powerpic)
 for more info.
 
 ### Requirements

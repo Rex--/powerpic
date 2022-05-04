@@ -1,6 +1,6 @@
 /** @file uart.c
  *
- * UART driver for PIC16LF1919x on Hardware EUSART1
+ * UART driver for PIC16LF1919x devices using Hardware EUSART1.
  *
  * This driver implements an 8-byte buffer for both receiving and transmitting.
  * Function are provided that interface with the standard library `stdio.h`.
@@ -11,7 +11,9 @@
 #include <stdint.h>
 #include <xc.h>
 
-#include "drivers/uart.h"
+#include "lib/isr.h"
+
+#include "lib/uart.h"
 
 #define UART_TX_BUFFER_SIZE    8    /**< Length of UART transmit buffer in bytes */
 #define UART_RX_BUFFER_SIZE    8    /**< Length of UART receive buffer in bytes */
@@ -28,15 +30,19 @@ static volatile uint8_t uart_rx_buffer_remaining = 0;
 static volatile uint8_t uart_rx_buffer[UART_RX_BUFFER_SIZE] = {0};
 
 
+static void uart_tx_isr (void);
+static void uart_rx_isr (void);
+
+
+
 /**
  * Initialize the UART driver with default settings.
  * Currently supports no configuration options. Assumes a 1MHz clock speed and
  * 9600 baud serial connection. After this is called standard i/o functions from
  * stdio.h can be used such as printf().
  * 
- * @returns 0 if initialized, <0 if an error occurred.
 */
-int
+void
 uart_init (void)
 {
     // Before configuring the USART module, the PORT pins need to be configured
@@ -65,8 +71,8 @@ uart_init (void)
     // We want to use the 16-bit generator and set SP1BRG to 25 to achieve our
     // desired baud of 9615 @ 1MHz clock speed- which is close enough to 9600.
     //
-    BAUD1CON = 0b01001000;
-    SP1BRG = 25;
+    BAUD1CON = 0x48;
+    SP1BRGL = 0x19;
 
     // The following registers configure the Transmit and Receive modules:
     // 
@@ -84,8 +90,8 @@ uart_init (void)
     // We want to use the 16-bit Baud Rate Generator so set BRGH.^
     //   ( Maybe we should set that bit above ^ )
     //
-    TX1STA = 0b00100100;
-    RC1STA = 0b10010000;
+    TX1STA = 0x24;
+    RC1STA = 0x90;
 
     // Set up the default driver state.
     //
@@ -101,10 +107,16 @@ uart_init (void)
     //
     PIE3bits.RC1IE = 1;
 
+
+    // Register UART isr
+    //
+    isr_register(3, _PIE3_TX1IE_MASK, &uart_tx_isr);
+    isr_register(3, _PIE3_RC1IE_MASK, &uart_rx_isr);
+
     // TODO: Add some error checking to make sure USART Module has actually been
     // enabled and is ready for use.
     //
-    return 0;
+    return;
 }   /* uart_init() */
 
 
@@ -210,7 +222,7 @@ uart_read (void)
  * This handles writing of data to TX1REG from the uart_tx_buffer. It should be
  * called by the main ISR when TX1IE is enabled and TX1IF is triggered.
 */
-void
+static void
 uart_tx_isr (void)
 {
     // Check if there is any data in the tx_buffer
@@ -247,7 +259,7 @@ uart_tx_isr (void)
  * This handles reading of the RC1REG register into rx_buffer. It should be
  * called by the main ISR when RC1IE is enabled and RC1IF is triggered.
 */
-void
+static void
 uart_rx_isr (void)
 {
     // Read a byte of data from the receive register
@@ -263,6 +275,33 @@ uart_rx_isr (void)
     }
     uart_rx_buffer_remaining++;
 }   /* uart_rx_isr() */
+
+/**
+ * UART Driver interrupt service routine.
+ * 
+ * This should be called from the main ISR **only** after initialization
+ * of the driver.
+ * 
+ * @returns
+ *   1 if an interrupt was detected and triggered, 0 otherwise.
+*/
+void
+uart_isr (void)
+{
+    // USART1 Transmit Interrupt flag
+    //
+    if (1 == PIE3bits.TX1IE && 1 == PIR3bits.TX1IF)
+    {
+        uart_tx_isr();
+    }
+
+    // USART1 Receive Interrupt Flag
+    //
+    else if (1 == PIE3bits.RC1IE && 1 == PIR3bits.RC1IF)
+    {
+        uart_rx_isr();
+    }
+}   /* uart_isr() */
 
 
 /**

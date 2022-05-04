@@ -8,7 +8,7 @@
 
 // LCD Charge Pump Enable Bit.
 //
-#pragma config LCDPEN = OFF
+#pragma config LCDPEN = ON
 
 // Power-up Oscillator mode - High freq internal oscillator at 1MHz
 //

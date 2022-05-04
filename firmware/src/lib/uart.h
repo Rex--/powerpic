@@ -14,21 +14,21 @@
 #ifndef UART_H
 #define UART_H
 
-int    uart_init (void);
+void    uart_init (void);
+
+void    uart_isr (void);
 
 // These functions implement functions relating to the Transmitter.
 //
 void    uart_write (uint8_t data);
-void    uart_tx_isr (void);
 
 
 // These functions implement functions relating to the Receiver.
 //
 uint8_t uart_read (void);
-void    uart_rx_isr (void);
 
 
-// These function implement stub functions for stdio.h to hook into and provide
+// These functions implement stub functions for stdio.h to hook into and provide
 // support for printf() and scanf().
 //
 void    putch (uint8_t data);

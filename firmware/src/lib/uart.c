@@ -71,7 +71,7 @@ uart_init (void)
     // We want to use the 16-bit generator and set SP1BRG to 25 to achieve our
     // desired baud of 9615 @ 1MHz clock speed- which is close enough to 9600.
     //
-    BAUD1CON = 0x48;
+    BAUD1CON = 0b01001000;
     SP1BRGL = 0x19;
 
     // The following registers configure the Transmit and Receive modules:

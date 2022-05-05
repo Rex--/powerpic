@@ -5,6 +5,6 @@
 
 
 
-extern const unsigned char default_font[];
+extern const unsigned char * display_fonts[];
 
 #endif

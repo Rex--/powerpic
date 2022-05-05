@@ -33,7 +33,7 @@ display_enable (void)
 {
     lcd_init();
     lcd_needs_update = 0;
-    current_font = &default_font[0];
+    current_font = display_fonts[0];
 }
 
 void
@@ -44,6 +44,12 @@ display_update (void)
         lcd_update();
         lcd_needs_update = 0;
     }
+}
+
+void
+display_set_font (unsigned char font)
+{
+    current_font = display_fonts[font];
 }
 
 // Map negative positions to absolute

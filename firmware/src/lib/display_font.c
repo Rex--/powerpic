@@ -1,6 +1,7 @@
 
 #include "lib/display_font.h"
 
+
 /**
  * Enum to easily define character segments.
  * A-P are used for the primary display characters,
@@ -132,4 +133,14 @@ const unsigned char default_font[] = {
     B|C,                // | Left side
     E|F|G,              // }
     A,                  // ~ Top segment
+};
+
+
+
+
+/**
+ * Available display fonts.
+*/
+const unsigned char * display_fonts[] = {
+    &default_font[0],
 };

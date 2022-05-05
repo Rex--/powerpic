@@ -81,6 +81,7 @@ mode_manager_init (void)
 const mode_config_t mode_config_default = {
     .keymap =   0,
     .tickrate = 0,
+    .font = 0,
 };
 
 int
@@ -161,6 +162,12 @@ int
 mode_manager_get_keymap (void)
 {
     return managed_configs[current_mode].keymap;
+}
+
+unsigned char
+mode_manager_get_font (void)
+{
+    return managed_configs[current_mode].font;
 }
 
 /*** EOF ***/

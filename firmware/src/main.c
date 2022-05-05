@@ -123,6 +123,8 @@ main (void)
             mode_keymap = mode_manager_get_keymap();
 
             keypad_keymap_set(mode_keymap);
+
+            display_set_font(mode_manager_get_font());
         }
 
         if (0 != mode_tickrate)

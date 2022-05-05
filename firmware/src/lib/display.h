@@ -23,6 +23,8 @@
 void    display_enable (void);
 void    display_update  (void);
 
+void    display_set_font                (unsigned char font);
+
 void    display_primary_character       (signed char position, unsigned char character);
 void    display_primary_string          (signed char position, const char *string);
 void    display_primary_number          (signed char position, long number);

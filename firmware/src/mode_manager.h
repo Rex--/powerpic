@@ -11,6 +11,7 @@ void mode_manager_thread (unsigned int event);
 int mode_manager_config_update (void);
 int mode_manager_get_tickrate (void);
 int mode_manager_get_keymap (void);
+unsigned char mode_manager_get_font (void);
 #endif
 
 /*** EOF ***/

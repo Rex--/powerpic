@@ -10,11 +10,14 @@
 */
 typedef struct
 {
-    /** Default tickrate. */
+    /** Mode's tickrate. */
     int tickrate;
 
-    /** Default keymap. */
+    /** Mode's keymap. */
     unsigned char keymap;
+
+    /** Mode's font. */
+    unsigned char font;
 } mode_config_t;
 
 typedef void (*init_t)   (mode_config_t *cfg);

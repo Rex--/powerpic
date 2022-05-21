@@ -5,7 +5,7 @@
 TARGET := PowerOS
 
 ## The device to compile for
-MCU := 16LF19196
+MCU := 16LF19197
 
 ## Source directory
 SOURCE_DIR := src

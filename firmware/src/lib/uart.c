@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <xc.h>
 
+#include "dev_config.h"
+
 #include "lib/isr.h"
 
 #include "lib/uart.h"
@@ -45,6 +47,7 @@ static void uart_rx_isr (void);
 void
 uart_init (void)
 {
+#   if (1 == PCB_REV)
     // Before configuring the USART module, the PORT pins need to be configured
     // as well as the Peripherial Pin Select (PPS) module.
     // Currently the pins used aren't configurable, they are:
@@ -54,9 +57,17 @@ uart_init (void)
     TRISCbits.TRISC3 = 0;   // Set RC3(TX) as output
     RC3PPS = 0x0D;          // x0D is the value for TX for USART1
 
-    TRISCbits.TRISC2 = 1;   // Set RC2 as input
-    ANSELCbits.ANSC2 = 0;   // Disable analog input
-    RX1PPS = 0x12;          // 0x12 is the value for RC2
+    // TRISCbits.TRISC2 = 1;   // Set RC2 as input
+    // ANSELCbits.ANSC2 = 0;   // Disable analog input
+    // RX1PPS = 0x12;          // 0x12 is the value for RC2
+#   endif
+
+#   if (2 == PCB_REV)
+
+    TRISCbits.TRISC4 = 0;
+    RC4PPS = 0x0D;
+
+#   endif
 
     // The following registers control the baudrate generation for the EUSART 1
     // module:
@@ -90,8 +101,8 @@ uart_init (void)
     // We want to use the 16-bit Baud Rate Generator so set BRGH.^
     //   ( Maybe we should set that bit above ^ )
     //
-    TX1STA = 0x24;
-    RC1STA = 0x90;
+    TX1STA = 0b00100100;
+    RC1STA = 0b10000000;
 
     // Set up the default driver state.
     //
@@ -99,19 +110,19 @@ uart_init (void)
     uart_tx_buffer_tail = 0;
     uart_tx_buffer_remaining = sizeof(uart_tx_buffer);
 
-    uart_rx_buffer_head = 0;
-    uart_rx_buffer_tail = 0;
-    uart_rx_buffer_remaining = 0;
+    // uart_rx_buffer_head = 0;
+    // uart_rx_buffer_tail = 0;
+    // uart_rx_buffer_remaining = 0;
 
     // Enable Receive interrupt
     //
-    PIE3bits.RC1IE = 1;
+    // PIE3bits.RC1IE = 1;
 
 
     // Register UART isr
     //
     isr_register(3, _PIE3_TX1IE_MASK, &uart_tx_isr);
-    isr_register(3, _PIE3_RC1IE_MASK, &uart_rx_isr);
+    // isr_register(3, _PIE3_RC1IE_MASK, &uart_rx_isr);
 
     // TODO: Add some error checking to make sure USART Module has actually been
     // enabled and is ready for use.
@@ -186,6 +197,7 @@ uart_write (uint8_t data)
  * 
  * @returns The byte of data that was read.
 */
+#if 0
 uint8_t
 uart_read (void)
 {
@@ -214,6 +226,7 @@ uart_read (void)
 
     return data;
 }
+#endif
 
 
 /**
@@ -259,22 +272,22 @@ uart_tx_isr (void)
  * This handles reading of the RC1REG register into rx_buffer. It should be
  * called by the main ISR when RC1IE is enabled and RC1IF is triggered.
 */
-static void
-uart_rx_isr (void)
-{
-    // Read a byte of data from the receive register
-    //
-    uart_rx_buffer[uart_rx_buffer_head] = RC1REG;
+// static void
+// uart_rx_isr (void)
+// {
+//     // Read a byte of data from the receive register
+//     //
+//     uart_rx_buffer[uart_rx_buffer_head] = RC1REG;
 
-    // Increment rx_buffer_head
-    //
-    uart_rx_buffer_head++;
-    if (sizeof(uart_tx_buffer) <= uart_rx_buffer_head)
-    {
-        uart_rx_buffer_head = 0;
-    }
-    uart_rx_buffer_remaining++;
-}   /* uart_rx_isr() */
+//     // Increment rx_buffer_head
+//     //
+//     uart_rx_buffer_head++;
+//     if (sizeof(uart_tx_buffer) <= uart_rx_buffer_head)
+//     {
+//         uart_rx_buffer_head = 0;
+//     }
+//     uart_rx_buffer_remaining++;
+// }   /* uart_rx_isr() */
 
 /**
  * UART Driver interrupt service routine.
@@ -299,7 +312,7 @@ uart_isr (void)
     //
     else if (1 == PIE3bits.RC1IE && 1 == PIR3bits.RC1IF)
     {
-        uart_rx_isr();
+        // uart_rx_isr();
     }
 }   /* uart_isr() */
 
@@ -325,11 +338,11 @@ putch (uint8_t data)
  * 
  * @returns The byte of data read. Blocks if no data available.
 */
-int
-getch (void)
-{
-    return abs(uart_read());
-}   /* getch() */
+// int
+// getch (void)
+// {
+//     return abs(uart_read());
+// }   /* getch() */
 
 
 /*** EOF ***/

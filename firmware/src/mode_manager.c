@@ -9,12 +9,14 @@
 #include "lib/event.h"
 #include "lib/mode.h"
 #include "lib/isr.h"
+#include "lib/display.h"
 #include "lib/buttons.h"    // TODO: remove
 
 #include "modes/test_mode.h"
 #include "modes/power.h"
 #include "modes/clock.h"
-#include "modes/counter.h"
+#include "modes/thermometer.h"
+#include "modes/settings.h"
 
 #include "mode_manager.h"
 
@@ -56,9 +58,10 @@ mode_manager_init (void)
     // Add modes to be managed
     //
     mode_manager_add(CLOCK_MODE);
-    mode_manager_add(TEST_MODE);
+    mode_manager_add(THERMOMETER_MODE);
     mode_manager_add(POWER_MODE);
-    mode_manager_add(COUNTER_MODE);
+    mode_manager_add(TEST_MODE);
+    mode_manager_add(SETTINGS_MODE);
 
     // Init modes
     //
@@ -132,6 +135,8 @@ mode_manager_thread (unsigned int event)
             printf("[MM]Switching Modes: [%i] -> [%i]\n\r", current_mode, next_mode);
 
             mode_stop(&managed_modes[current_mode], &managed_configs[current_mode]);
+
+            display_segments_zero();
 
             mode_start(&managed_modes[next_mode], &managed_configs[next_mode]);
 

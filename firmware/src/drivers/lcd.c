@@ -10,6 +10,8 @@
 
 #include <xc.h>
 
+#include "dev_config.h"
+
 #include "drivers/lcd.h"
 
 
@@ -25,7 +27,9 @@
  * position being 1. A blank character is located at index 0.
 */
 static const unsigned int primary_segments[9][7] = {
-    {0x0},                                                      // 0 Blank
+    {0x0}, // TODO: Remove, Leftover from bad code
+
+#if (1 == PCB_REV)
     {0x1704, 0x1705, 0x1105, 0x0B04, 0x0B03, 0x1103, 0x1104},   // 1 Left most
     {0x1507, 0x0C00, 0x0600, 0x0907, 0x0902, 0x0F02, 0x0F07},   // 2
     {0x0E07, 0x1201, 0x0C01, 0x0900, 0x0F01, 0x1501, 0x1500},   // 3
@@ -34,6 +38,18 @@ static const unsigned int primary_segments[9][7] = {
     {0x1300, 0x1301, 0x0D01, 0x0700, 0x0906, 0x0F06, 0x0D00},   // 6
     {0x1303, 0x1505, 0x0F05, 0x0703, 0x0702, 0x0D02, 0x0D03},   // 7
     {0x1604, 0x1605, 0x1005, 0x0A04, 0x0A06, 0x1006, 0x1004}    // 8 Right most
+#endif
+
+#if (2 == PCB_REV)
+    {0x1500, 0x1501, 0x0F01, 0x0900, 0x0807, 0x0E07, 0x0F00},
+    {0x1705, 0x1104, 0x0B04, 0x0B05, 0x0902, 0x0F02, 0x1105},
+    {0x0D04, 0x1403, 0x0E03, 0x0B02, 0x1103, 0x1703, 0x1702},
+    {0x1404, 0x1701, 0x1101, 0x0804, 0x0805, 0x0E05, 0x0E04},
+    {0x1604, 0x1507, 0x0F07, 0x0A04, 0x0A05, 0x1005, 0x1004},
+    {0x1201, 0x1202, 0x0C02, 0x0601, 0x0600, 0x0C00, 0x0C01},
+    {0x1204, 0x1205, 0x0C05, 0x0604, 0x0603, 0x0C03, 0x0C04},
+    {0x1207, 0x1506, 0x0F06, 0x0607, 0x0606, 0x0C06, 0x0C07}
+#endif
 };
 
 /**
@@ -44,12 +60,23 @@ static const unsigned int primary_segments[9][7] = {
 static const unsigned int secondary_segments[3][10] = {
     {0x0},                                                      // 0 Blank
 
+#if (1 == PCB_REV)
+
     {0x0805, 0x0E05, 0x1404, 0x1606, 0x1406, 0x0E06, 0x1405,    // 1 Left
      0x0806, 0x1302, 0x0807},   // 3 extra segments for the .5 character.
     
     {0x0803, 0x0A07, 0x1007, 0x1607, 0x1403, 0x0E04, 0x0E03,    // 2 Right
      0x0804, 0x0000, 0x0000}    // This charcter only has 1 extra, so the
                                 // 2 high bits are empty.
+#endif
+
+#if (2 == PCB_REV)
+    {0x0703, 0x0D03, 0x1302, 0x1206, 0x1505, 0x0F05, 0x1303,
+     0x0905, 0x1203, 0x0704},
+
+    {0x0701, 0x0700, 0x0D00, 0x1300, 0x1301, 0x0D02, 0x0D01,
+     0x0702, 0x0000, 0x0000}
+#endif
 };
 
 /**
@@ -59,6 +86,8 @@ static const unsigned int secondary_segments[3][10] = {
 */
 static const unsigned int period_segments[10] = {
     0x0,        // 0 Blank
+
+#if (1 == PCB_REV)
     0x0B05,     // 1 Left most
     0x0901,     // 2
     0x0601,     // 3
@@ -68,6 +97,19 @@ static const unsigned int period_segments[10] = {
     0x0905,     // 7
     0x0A05,     // 8 Right most
     0x0F00      // 9th period is the colon.
+#endif
+
+#if (2== PCB_REV)
+    0x0901,
+    0x0C02,
+    0x0803,
+    0x0C01,
+    0x0907,
+    0x0602,
+    0x0605,
+    0x0906,
+    0x1102
+#endif
 };
 
 /**
@@ -77,10 +119,20 @@ static const unsigned int period_segments[10] = {
 */
 static const unsigned int sign_segments[5] = {
     0x0,
+
+#if (1 == PCB_REV)
     0x1506,     // Addition sign
     0x1205,     // Subtraction sign
     0x1202,     // Multiplication sign
     0x1407      // Division sign
+#endif
+
+#if (2 == PCB_REV)
+    0x1305,
+    0x1605,
+    0x1504,
+    0x1404
+#endif
 };
 
 /**
@@ -92,11 +144,22 @@ static const unsigned int sign_segments[5] = {
 */
 static const unsigned int misc_segments[6] = {
     0x0,
+
+#if (1 == PCB_REV)
     0x1102,     // Bell
     0x0B02,     // Wave thingy
     0x1702,     // [O]K
     0x1502,     // PM
     0x1703      // AM
+#endif
+
+#if (2 == PCB_REV)
+    0x0E06,
+    0x0806,
+    0x1406,
+    0x1502,
+    0x1407
+#endif
 };
 
 /**
@@ -126,6 +189,18 @@ static void         lcd_segments_enable (void);
 void
 lcd_init (void)
 {
+#   if (1 == PCB_REV)
+    // Configure controllr to use LFINTOSC
+    //
+    LCDCONbits.CS = 0;
+#   endif
+
+#   if (2 == PCB_REV)
+    // Configure controllr to use SOSC
+    //
+    LCDCONbits.CS = 1;
+#   endif
+
     // Configure controller to use 1/4 mux.
     //
     LCDCONbits.LMUX = 0x04;
@@ -376,6 +451,7 @@ lcd_segments_clear (void)
     for (char lcddata = 0; lcddata < LCD_NUM_DATA_REGISTERS; lcddata++)
     {
         lcd_data[lcddata] = 0x0;
+        lcd_buffer[lcddata] = 0x0;
     }
 }   /* lcd_segments_clear() */
 
@@ -390,6 +466,7 @@ lcd_segments_set (void)
     for (char lcddata = 0; lcddata < LCD_NUM_DATA_REGISTERS; lcddata++)
     {
         lcd_data[lcddata] = 0xFF;
+        lcd_buffer[lcddata] = 0xFF;
     }
 }   /* lcd_segments_set() */
 
@@ -401,6 +478,7 @@ lcd_segments_set (void)
 static void
 lcd_segments_enable (void)
 {
+#   if (1 == PCB_REV)
     // Seg 1-7
     //
     LCDSE0 = 0xFF;
@@ -424,6 +502,23 @@ lcd_segments_enable (void)
     //Seg 42-45
     //
     LCDSE5 = 0x3C;
+#   endif
+
+#   if (2 == PCB_REV)
+
+    LCDSE0 = 0b11111111;
+
+    LCDSE1 = 0b00011111;
+
+    LCDSE2 = 0b11111000;
+
+    LCDSE3 = 0b11100111;
+
+    LCDSE4 = 0b00110000;
+
+    LCDSE5 = 0b00111111;
+
+#   endif
 
     return;
 }   /* lcd_segements_enable() */

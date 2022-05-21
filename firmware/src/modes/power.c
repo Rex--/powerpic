@@ -4,6 +4,7 @@
 
 #include "lib/mode.h"
 #include "lib/display.h"
+#include "lib/keypad.h"
 #include "lib/battery.h"
 
 #include "modes/power.h"
@@ -39,9 +40,13 @@ power_thread (mode_config_t *cfg, unsigned int event)
         voltage_display();
     }
     //keypad events
-    else if ((event & 0xFF) == 0xCE)
+    else if ((event & 0xFF) == KEYPAD_KEY_PRESS_EVENT)
     {
 
+    }
+    else if (event == 0x020b)
+    {
+        LATGbits.LATG7 = ~LATGbits.LATG7;
     }
     else
     {

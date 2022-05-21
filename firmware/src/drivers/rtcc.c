@@ -6,6 +6,8 @@
 #include <xc.h>
 #include <stdio.h>
 
+#include "dev_config.h"
+
 
 typedef struct
 {
@@ -78,9 +80,18 @@ rtcc_init (void)
     RTCCONbits.RTCWREN = 1;
     if (RTCCONbits.RTCWREN)
     {
-        // Set up clock source to MFINTOSC/16
+#       if (1 == PCB_REV)
+        // Set up clock source to MFINTOSC/16 at 31.25kHz
         //
         RTCCONbits.RTCCLKSEL = 0b01;
+#       endif
+
+#       if (2 == PCB_REV)
+        // Set up clock source to SOSC at 32.768kHz
+        //
+        RTCCONbits.RTCCLKSEL = 0b00;
+#       endif
+
         // RTCCAL = 0b11111111;
         // rtcc_datetime_set(&midnight);
         RTCCONbits.RTCEN = 1;

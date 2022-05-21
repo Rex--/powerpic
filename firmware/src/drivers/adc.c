@@ -31,7 +31,7 @@ adc_init (void)
 
     // Double sample enable bit. First conversion appears in prev.
     //
-    ADCON1bits.DSEN = 1;
+    // ADCON1bits.DSEN = 1;
 
     return;
 }   /* adc_init() */

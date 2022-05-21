@@ -46,6 +46,9 @@ void    display_sign_clear              (signed char position);
 void    display_misc                    (signed char position);
 void    display_misc_clear              (signed char position);
 
+
+void display_segments_zero (void);
+
 #endif
 
 /*** EOF ***/

@@ -5,6 +5,8 @@
 #include <xc.h>
 #include <stdio.h>
 
+#include "dev_config.h"
+
 #include "drivers/ioc.h"
 
 #include "lib/isr.h"
@@ -12,26 +14,27 @@
 
 #include "lib/keypad.h"
 
+#define KEYPAD_ROW_MASK          0x0F
+#define KEYPAD_ROW_0             PORTAbits.RA0   // row 0 - RA0
+#define KEYPAD_ROW_1             PORTABITS.RA1   // row 1 - RA1
+#define KEYPAD_ROW_2             PORTABITS.RA2   // row 2 - RA2
+#define KEYPAD_ROW_3             PORTABITS.RA3   // row 3 - RA3
 
-// Keypad Configuration
-//
+#if (1 == PCB_REV)
+#   define KEYPAD_COLUMN_MASK      0xC3
+#   define KEYPAD_COLUMN_0         PORTCbits.RC1   // col 0 - RC1
+#   define KEYPAD_COLUMN_1         PORTCbits.RC0   // col 1 - RC0
+#   define KEYPAD_COLUMN_2         PORTCbits.RC6   // col 2 - RC6
+#   define KEYPAD_COLUMN_3         PORTCbits.RC7   // col 3 - RC7
+#endif
 
-#define KEYPAD_USE_INTERRUPTS
-
-#define KEYPAD_COLUMN_NUM       4
-#define KEYPAD_COLUMN_MASK      0xC3
-#define KEYPAD_COLUMN_0         PORTCbits.RC1
-#define KEYPAD_COLUMN_1         PORTCbits.RC0
-#define KEYPAD_COLUMN_2         PORTCbits.RC6
-#define KEYPAD_COLUMN_3         PORTCbits.RC7
-
-#define KEYPAD_ROW_NUM          4
-#define KEYPAD_ROW_MASK         0x0F
-#define KEYPAD_ROW_0            PORTAbits.RA0
-#define KEYPAD_ROW_1            PORTAbits.RA1
-#define KEYPAD_ROW_2            PORTAbits.RA2
-#define KEYPAD_ROW_3            PORTAbits.RA3
-
+#if (2 <= PCB_REV)
+    #define KEYPAD_COLUMN_MASK      0xCC
+    #define KEYPAD_COLUMN_0         PORTCbits.RC6   // col 0 - RC6
+    #define KEYPAD_COLUMN_1         PORTCbits.RC7   // col 1 - RC7
+    #define KEYPAD_COLUMN_2         PORTCbits.RC2   // col 2 - RC2
+    #define KEYPAD_COLUMN_3         PORTCbits.RC3   // col 3 - RC3
+#endif
 
 // Some useful keymaps that can be overlayed over the default keycodes.
 //
@@ -79,15 +82,12 @@ const char keypad_keymap_telephone[16][4] = {
   {0x0,0x0,0x0,0x0},  {0x0,0x0,0x0,0x0},  {0x0,0x0,0x0,0x0},  {0x0,0x0,0x0,0x0}
 };
 
-static int keypad_button = 0;
-
 static int keypad_lastkey = 0;
 
 static int trigger = 0;
 
-static int keypad_keymap = 0;
+static const char * keypad_keymap = NULL;
 
-static int keypad_events[20];
 
 void keypad_isr (void);
 
@@ -99,44 +99,32 @@ void keypad_isr (void);
 void
 keypad_enable (void)
 {
-    // Setup default driver state
+    // Setup default state
     //
-    keypad_button = -1;
     keypad_lastkey = -1;
-    keypad_keymap = 0;
     trigger = 0;
-
-    // Configure row pins:
-    // Row pins will be used as outputs,
-    // with a default LOW state
-    // row 0 - RA0
-    // row 1 - RA1
-    // row 2 - RA2
-    // row 3 - RA3
-    //
-    TRISA &= 0b11110000;
-    LATA  &= 0b11110000;
-
-    // Configure column pins:
-    // Columns will be inputs with weak pull-ups enabled
-    // col 0 - RC1
-    // col 1 - RC0
-    // col 2 - RC6
-    // col 3 - RC7
-    //
-    TRISC |= 0b11000011;
-    WPUC  |= 0b11000011;
+    keypad_keymap = &keypad_keymap_default[0];
 
     // Disable IOC interrupts while configuring pins.
     //
     IOC_DISABLE;
 
+    // Configure row pins:
+    // Row pins will be used as outputs,
+    // with a default LOW state
+    //
+    TRISA &= ~KEYPAD_ROW_MASK;
+    LATA  &= ~KEYPAD_ROW_MASK;
+
     // Enable IOC driver for the columns
     //
-    ioc_pin_enable(IOC_PORTC, 1, IOC_EDGE_FALLING);
-    ioc_pin_enable(IOC_PORTC, 0, IOC_EDGE_FALLING);
-    ioc_pin_enable(IOC_PORTC, 6, IOC_EDGE_FALLING);
-    ioc_pin_enable(IOC_PORTC, 7, IOC_EDGE_FALLING);
+    ioc_mask_enable(IOC_PORTC, KEYPAD_COLUMN_MASK, IOC_EDGE_BOTH);
+
+    // Configure column pins:
+    // Columns will be inputs with weak pull-ups enabled
+    //
+    TRISC |= KEYPAD_COLUMN_MASK;
+    WPUC  |= KEYPAD_COLUMN_MASK;
 
     // Register keypad isr
     //
@@ -148,70 +136,56 @@ keypad_enable (void)
 void
 keypad_keymap_set (int keymap)
 {
-    keypad_keymap = keymap;
-}
-
-/**
- * 
-*/
-int
-keypad_pressed (void)
-{
-    if (keypad_button != keypad_lastkey)
+    switch (keymap)
     {
-        keypad_button = keypad_lastkey;
-        return keypad_keymap_default[keypad_button];
-    }
+        case KEYPAD_KEYMAP_DEFAULT:
+            keypad_keymap = &keypad_keymap_default[0];
+        break;
 
-    return -1;
-}
+        case KEYPAD_KEYMAP_DIR:
+            keypad_keymap = &keypad_keymap_directional[0];
+        break;
 
-int keypad_check (void)
-{
-    if (keypad_button != keypad_lastkey)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
+        case KEYPAD_KEYMAP_SEL:
+            keypad_keymap = &keypad_keymap_selection[0];
+        break;
+
+        case KEYPAD_KEYMAP_T9:
+            keypad_keymap = &keypad_keymap_telephone[0][0];
+        break;
+        
+        default:
+        case KEYPAD_KEYMAP_CODE:
+            keypad_keymap = NULL;
+        break;
     }
 }
 
 
 void
-keypad_keypress (int keycode)
+keypad_keypress (unsigned char keycode)
 {
     unsigned char mapped_key = 0;
 
-    switch (keypad_keymap)
+    if (NULL == keypad_keymap)
     {
-        case KEYPAD_KEYMAP_DEFAULT:
-            mapped_key = keypad_keymap_default[keycode];
-        break;
+        mapped_key = keycode;
+    }
+    else
+    {
+        mapped_key = keypad_keymap[keycode];
+    }
 
-        case KEYPAD_KEYMAP_DIR:
-            mapped_key = keypad_keymap_directional[keycode];
-        break;
-
-        case KEYPAD_KEYMAP_SEL:
-            mapped_key = keypad_keymap_selection[keycode];
-        break;
-
-        case KEYPAD_KEYMAP_CODE:
-            mapped_key = (unsigned char)keycode;
-        break;
-
-        case KEYPAD_KEYMAP_T9:
-            mapped_key = keypad_keymap_telephone[keycode][0];
-        break;
-        
-        default:
-            mapped_key = (unsigned char)keycode;
-        break;
-    }   
+    trigger = 1;
     keypad_lastkey = mapped_key;
-    event_add(0xCE, mapped_key);
+    event_add(KEYPAD_KEY_PRESS_EVENT, mapped_key);
+}
+
+void
+keypad_keyrelease (void)
+{
+    trigger = 0;
+    event_add(KEYPAD_KEY_RELEASE_EVENT, keypad_lastkey);
 }
 
 /**
@@ -228,19 +202,19 @@ inline int keypad_column_check (void)
     //
     if (0 < (~PORTC & KEYPAD_COLUMN_MASK))
     {
-        if (0 == PORTCbits.RC1)
+        if (0 == KEYPAD_COLUMN_0)
         {
             column = 0;
         }
-        else if (0 == PORTCbits.RC0)
+        else if (0 == KEYPAD_COLUMN_1)
         {
             column = 1;
         }
-        else if (0 == PORTCbits.RC6)
+        else if (0 == KEYPAD_COLUMN_2)
         {
             column = 2;
         }
-        else if (0 == PORTCbits.RC7)
+        else if (0 == KEYPAD_COLUMN_3)
         {
             column = 3;
         }
@@ -249,7 +223,7 @@ inline int keypad_column_check (void)
     return column;
 }
 
-
+#if 0
 /**
  * Select a keypad row.
  * Selecting a row consists of setting all rows high except the given row. The
@@ -283,8 +257,10 @@ keypad_row_select (int row)
 
     return;
 }   /* keypad_row_select() */
+#endif
 
 
+#if 0
 /**
  * Scan keypad for any pressed keys.
  * This function adds any detected keys into the key buffer.
@@ -328,56 +304,28 @@ keypad_scan (void)
  
     return;
 }   /* keypad_scan() */
+#endif
 
 
 void
 keypad_isr (void)
 {
-    // if (IOCIE == 1 && IOCIF == 1)
-    // {
-        // TXREG1 = 'k';
-        // trigger = 1;
-        // keypad_scan();
-        // if (IOCCFbits.IOCCF1 == 1)
-        // {
-        //     // col 0
-        //     IOCCFbits.IOCCF1 = 0;
-        //     trigger = 1;
-        //     // keypad_button = 0;
-        // }
-
-        // if (IOCCFbits.IOCCF0 == 1)
-        // {
-        //     // col 1
-        //     IOCCFbits.IOCCF0 = 0;
-        //     trigger = 1;
-        //     // keypad_button = 1;
-        // }
-
-        // if (IOCCFbits.IOCCF6 == 1)
-        // {
-        //     // col 2
-        //     IOCCFbits.IOCCF6 = 0;
-        //     trigger = 1;
-        //     // keypad_button = 2;
-        // }
-
-        // if (IOCCFbits.IOCCF7 == 1)
-        // {
-        //     // col 3
-        //     IOCCFbits.IOCCF7 = 0;
-        //     trigger = 1;
-        //     // keypad_button = 3;
-        // }
-
-        if (IOCCF & KEYPAD_COLUMN_MASK) {
+    if (IOCCF & KEYPAD_COLUMN_MASK) {
+        TXREG1 = 'k';
+        if (trigger)
+        {
+            // Key release
+            keypad_keyrelease();
+        }
+        else
+        {
             int column = 0;
             int row = 0;
 
-            TXREG1 = 'k';
             // Loop through rows and check the columns.
             //
-            for (row = 0; row < KEYPAD_ROW_NUM; row++)
+            TRISA &= ~KEYPAD_ROW_MASK;
+            for (row = 0; row < 4; row++)
             {
 
                 // Set all rows high
@@ -393,17 +341,17 @@ keypad_isr (void)
                 {
                     // Keycodes are 0-15 starting from the top left going right
                     //
-                    keypad_keypress((row * KEYPAD_COLUMN_NUM) + column);
+                    keypad_keypress((row * 4) + column);
                 }
             }
 
-            // Deselect all rows
+            // Set rows to default LOW state
             //
-            keypad_row_select(-1);
-            
-            // Clear column IOC flag
-            //
-            IOCCF &= ~(IOCCF & KEYPAD_COLUMN_MASK);
+            LATA &= ~KEYPAD_ROW_MASK;
         }
-    // }
+        
+        // Clear column IOC flag
+        //
+        IOCCF &= ~(IOCCF & KEYPAD_COLUMN_MASK);
+    }
 }

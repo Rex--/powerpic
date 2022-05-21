@@ -4,11 +4,18 @@
 #include <xc.h>
 #include <stdio.h>
 
+#include "dev_config.h"
+
 #include "drivers/lcd.h"
 #include "lib/display_font.h"
 
 #include "lib/display.h"
 
+
+
+#if DEV_BUILD
+#   define DISPLAY_DEBUG_PRINT
+#endif
 
 /**
  * Offset of ascii characters to our font array index.
@@ -134,6 +141,9 @@ display_primary_character (signed char position, unsigned char character)
 void
 display_primary_string (signed char position, const char *string)
 {
+#   ifdef DISPLAY_DEBUG_PRINT
+    printf("Display: %s\n\r", string);
+#   endif
     // Get the length of the string.
     //
     signed char string_len = 0;
@@ -545,6 +555,13 @@ void    display_misc_clear              (signed char position)
         }
     }
     lcd_needs_update = 1;
+}
+
+
+void
+display_segments_zero (void)
+{
+    lcd_segments_clear();
 }
 
 /*** EOF ***/

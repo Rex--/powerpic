@@ -8,6 +8,7 @@
 #include "lib/mode.h"
 #include "lib/display.h"
 #include "lib/keypad.h"
+#include "lib/buzzer.h"
 
 #include "modes/test_mode.h"
 
@@ -43,8 +44,6 @@ test_mode_start (mode_config_t *cfg)
     // Starting state
     test_mode_adj = 0;
     keypress = 0;
-    display_primary_clear(0);
-    display_primary_string(0, "hello");
 }
 
 
@@ -68,7 +67,7 @@ test_mode_edit (mode_config_t *cfg, unsigned int event)
 {
 
     // Keypress event
-    if ((event & 0xFF) == 0xCE)
+    if ((event & 0xFF) == KEYPAD_KEY_PRESS_EVENT)
     {
         // Keypresses 0-9
         if ( ((event >> 8) - 48) < 10 )
@@ -104,7 +103,7 @@ void test_mode_justify_start (mode_config_t *cfg)
 
 void test_mode_justify (mode_config_t *cfg, unsigned int event)
 {
-    if ((event & 0xFF) == 0xCE)
+    if ((event & 0xFF) == KEYPAD_KEY_PRESS_EVENT)
     {
         unsigned char key = event >> 8;
         if (key == '>' || key == '^')
@@ -126,7 +125,12 @@ void test_mode_justify (mode_config_t *cfg, unsigned int event)
     }
 }
 
-const char *test_str = "Press button or change Views with ADJ 8]}";
+const char *test_str = \
+    "the quick brown fox jumps over the lazy dog "
+    "!\"'()*+,-/<>=?[]\\^_`{}|~ "
+    "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG "
+    "0123456789 ";
+
 char *test_scroll_marker = NULL;
 unsigned char test_str_len = 8;
 signed char scrolla = 8;
@@ -145,41 +149,6 @@ test_mode_scroll (void)
     {
         test_scroll_marker = test_str;
     }
-
-
-
-
-
-    // if (scrolla < 0)
-    // {
-    //     display_secondary_character(1, '-');
-    //     display_secondary_character(2, -scrolla);
-    // }
-    // else
-    // {
-    //     display_secondary_clear(1);
-    //     display_secondary_character(2, scrolla);
-    // }
-    // display_primary_clear(0);
-    // display_primary_string(scrolla, test_str);
-    // scrolla--;
-
-    // if (scrolla == 0)
-    // {
-    //     scrolla = -2;
-    // }
-    // else if(scrolla < -8)
-    // {
-    //     scrolla = 8;
-    // }
-
-
-
-    // else if (scrolla == (LCD_PRIMARY_CHARACTERS - test_str_len))
-    // {
-    //     scrolla = -2;
-    // }
-
 }
 
 /**
@@ -199,9 +168,9 @@ test_mode_thread (mode_config_t *cfg, unsigned int event)
         return;
     }
 
-    if ((event & 0xFF) == 0xCE)
+    if ((event & 0xFF) == KEYPAD_KEY_PRESS_EVENT)
     {
-        if (event == 0x00ce)
+        if (event == 0x000C)
         {
             test_mode_justify_start(cfg);
             test_mode_adj = 2;
@@ -231,16 +200,11 @@ test_mode_thread (mode_config_t *cfg, unsigned int event)
     }
     else if ((event & 0xFF) == 0x01)
     {
-        // if (cfg->tickrate != -1)
-        // {
-        //     cfg->tickrate = -1;
-        // }
         test_mode_scroll();
     }
     else
     {
-        display_primary_clear(0);
-        display_primary_string(0, "Error");
+
     }
 }
 

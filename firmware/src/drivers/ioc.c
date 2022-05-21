@@ -35,7 +35,6 @@ ioc_pin_enable (unsigned char port, unsigned char pin, signed char edge)
 {
     switch (port)
     {
-#       ifdef IOC_PORTB        
         case IOC_PORTB:
             if (IOC_EDGE_BOTH == edge)
             {
@@ -51,9 +50,7 @@ ioc_pin_enable (unsigned char port, unsigned char pin, signed char edge)
                 IOCBP |= (1U << pin);
             }
         break;
-#       endif
 
-#       ifdef IOC_PORTC
         case IOC_PORTC:
             if (IOC_EDGE_BOTH == edge)
             {
@@ -69,9 +66,7 @@ ioc_pin_enable (unsigned char port, unsigned char pin, signed char edge)
                 IOCCP |= (1U << pin);
             }
         break;
-#       endif        
 
-#       ifdef IOC_PORTE
         case IOC_PORTE:
             if (IOC_EDGE_BOTH == edge)
             {
@@ -87,7 +82,71 @@ ioc_pin_enable (unsigned char port, unsigned char pin, signed char edge)
                 IOCEP |= (1U << pin);
             }
         break;
-#       endif
-
     }
 }   /* ioc_pin_enable() */
+
+/**
+ * Enables interrupts for a PORT.
+ * In the v1.1 board only PORTC is used.
+ * In v2.0 PORTC and PORTB are used.
+ * 
+ * @param   port    PORTx of the pin to enable.
+ * @param   mask    Mask of pins to enable.
+ * @param   edge    Edge of change to enable.
+ * 
+ * Use the included macros to define a port and edge.
+*/
+void
+ioc_mask_enable (unsigned char port, unsigned char mask, signed char edge)
+{
+    switch (port)
+    {
+        case IOC_PORTB:
+            if (IOC_EDGE_BOTH == edge)
+            {
+                IOCBP |= mask;
+                IOCBN |= mask;
+            }
+            else if (IOC_EDGE_FALLING == edge)
+            {
+                IOCBN |= mask;
+            }
+            else if (IOC_EDGE_RISING == edge)
+            {
+                IOCBP |= mask;
+            }
+        break;
+
+        case IOC_PORTC:
+            if (IOC_EDGE_BOTH == edge)
+            {
+                IOCCP |= mask;
+                IOCCN |= mask;
+            }
+            else if (IOC_EDGE_FALLING == edge)
+            {
+                IOCCN |= mask;
+            }
+            else if (IOC_EDGE_RISING == edge)
+            {
+                IOCCP |= mask;
+            }
+        break;
+
+        case IOC_PORTE:
+            if (IOC_EDGE_BOTH == edge)
+            {
+                IOCEP |= mask;
+                IOCEN |= mask;
+            }
+            else if (IOC_EDGE_FALLING == edge)
+            {
+                IOCEN |= mask;
+            }
+            else if (IOC_EDGE_RISING == edge)
+            {
+                IOCEP |= mask;
+            }
+        break;
+    }
+}   /* ioc_mask_enable() */

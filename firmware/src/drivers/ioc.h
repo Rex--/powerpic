@@ -5,7 +5,9 @@
 #ifndef IOC_H
 #define IOC_H
 
-#define IOC_PORTC           0
+#define IOC_PORTB           1
+#define IOC_PORTC           2
+#define IOC_PORTE           4
 
 #define IOC_EDGE_BOTH      -1
 #define IOC_EDGE_FALLING    0
@@ -17,5 +19,7 @@
 void ioc_init               (void);
 
 void ioc_pin_enable         (unsigned char port, unsigned char pin, signed char edge);
+
+void ioc_mask_enable         (unsigned char port, unsigned char mask, signed char edge);
 
 #endif

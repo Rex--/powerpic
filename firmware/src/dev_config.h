@@ -7,6 +7,10 @@
 
 #define _XTAL_FREQ 1000000 /**< The frequency of the oscillator. */
 
+#define PCB_REV     2
+
+#define DEV_BUILD   1
+
 #endif /* DEV_CONFIG_H */
 
 /*** EOF ***/

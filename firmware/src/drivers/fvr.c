@@ -66,14 +66,28 @@ fvr_cda_set (uint8_t gain)
  * NOTE: This feels like it'd be better as some macros, but this function
  * keeps consistency across the FVR driver interface.
  * 
- * @param[in] temperature_settings Temperature settings.
+ * @param[in] range Temperature settings.
  * 
 */
 void
-fvr_temperature_sensor_set (uint8_t temperature_settings)
+fvr_tim_power (unsigned char range)
 {
-    FVRCONbits.TSRNG = temperature_settings & 1U;
-    FVRCONbits.TSEN = (temperature_settings >> 1) & 1U;
+    switch (range)
+    {
+    case FVR_TEMPERATURE_LOW:
+        FVRCONbits.TSEN = 1;
+        FVRCONbits.TSRNG = 0;
+    break;
+
+    case FVR_TEMPERATURE_HIGH:
+        FVRCONbits.TSEN = 1;
+        FVRCONbits.TSRNG = 1;
+    break;
+    
+    default:
+        FVRCONbits.TSEN = 0;
+    break;
+    }
 }
 
 

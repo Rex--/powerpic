@@ -34,7 +34,7 @@ void        fvr_adc_set (uint8_t gain);
 
 void        fvr_cda_set (uint8_t gain);
 
-void        fvr_temperature_sensor_set (uint8_t temperature_settings);
+void        fvr_tim_power (unsigned char range);
 
 #endif
 

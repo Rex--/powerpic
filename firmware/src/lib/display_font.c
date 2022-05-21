@@ -82,7 +82,7 @@ const unsigned char default_font[] = {
     A|B|C|D|E|F,        // O
     A|B|E|F|G,          // P
     A|B|C|D|E|F,        // Q
-    E|G,                // R ** Lowercase
+    A|E|F,                // R ** Lowercase, but big
     A|C|D|F|G,          // S Like a 5
     D|E|F|G,            // T ** Lowercase
     B|C|D|E|F,          // U Like V
@@ -109,7 +109,7 @@ const unsigned char default_font[] = {
     A|E|F|G,            // f
     A|C|D|E|F|G,        // G ** Lowercase?
     C|E|F|G,            // h
-    E|F,                // i No dot, on left
+    E,                // i No dot, on left
     B|C|D|E,            // J
     B|C|E|F|G,          // K ** Uppercase Like H and X
     D|E|F,              // l Like a capitol I

@@ -33,7 +33,7 @@ pwm4_init (void)
     //
     T2CLKCON = 0x01; // clock - Fosc/4
     T2HLTbits.PSYNC = 1; // Synced with Fosc
-    T2CONbits.CKPS = 0b000; // 1:1
+    T2CONbits.CKPS = 0b101; // 1:32
     // T2PR = 64;
     T2CONbits.ON = 1;
 }

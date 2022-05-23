@@ -51,8 +51,12 @@ main (void)
     //
     OSCCON1bits.NDIV = 0x0;
 
-    // Set HFINTOSC to 1MHz giving us a 1MHz clock
-    OSCFRQ = 0x0;
+    // Set HFINTOSC to 32MHz giving us our desired freq of 32MHz
+    //
+    OSCFRQ = 0b110;
+
+    // Set HFINTOSC x2 PLL as clock source
+    // OSCCON1bits.NOSC = 0b001;
 
     // Init some base libs
     //

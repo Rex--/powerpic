@@ -5,6 +5,8 @@
 #ifndef EUSART_H
 #define EUSART_H
 
+void    eusart1_tx_init (void);
+
 #endif
 
 /*** EOF ***/

@@ -4,7 +4,3 @@
 The library consists of various modules for use by Mode applications. Each library implements an interface to specific peripherial as it relates to the watch functionality of the PowerPIC.
 
 ![](library-components.svg)
-
-The libraries relate to the various peripherials as follows:
-
-![](library-drivers.svg)

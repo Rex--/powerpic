@@ -4,53 +4,29 @@ skinparam componentStyle rectangle
 ' These are our low-level hardware driver components.
 ' They communicate directly with the hardware control registers.
 folder "drivers/" as devicedrivers {
-    ' database "LCD" as lcddriver {
-    '     file lcd.h
-    '     file lcd.c
-    '     lcd.h <..> lcd.c
-    ' }
-
-    ' database "GPIO" as gpiodriver {
-    '     file gpio.h
-    '     file gpio.c
-    '     gpio.h <..> gpio.c
-    ' }
-
-    ' database "IOC" as iocdriver {
-    '     file ioc.h 
-    '     file ioc.c
-    '     ioc.h <..> ioc.c
-    ' }
-
-    ' database "PWM" as pwmdriver {
-    '     file pwm.h
-    '     file pwm.c
-    '     pwm.h <..> pwm.c
-    ' }
-
-    ' database "ADC" as adcdriver {
-    '     file adc.h
-    '     file adc.c
-    '     adc.h <..> adc.c
-    ' }
-
-    ' database "RTCC" as rtccdriver {
-    '     file rtcc.h
-    '     file rtcc.c
-    '     rtcc.h <..> rtcc.c
-    ' }
-
     database "UART" as uartdriver {
         file uart.h
         file uart.c
         uart.h <..> uart.c
     }
 
-    ' database "INTManager" as intdriver {
-    '     file interrupts.h
-    '     file interrupts.c
-    '     interrupts.h <..> interrupts.c
-    ' }
+    database "INT" as intdriver {
+        file interrupts.h
+        file interrupts.c
+        interrupts.h <..> interrupts.c
+    }
+
+    database "ADC" as adcdriver {
+        file adc.h
+        file adc.c
+        adc.h <..> adc.c
+    }
+
+    database "FVR" as fvrdriver {
+        file fvr.h
+        file fvr.c
+        fvr.h <..> fvr.c
+    }
 }
 
 ' These represent the control registers on the PIC
@@ -59,25 +35,20 @@ node "Hardware Control Registers" {
     () PPS
     () INT
     () PORTx
+    () FVR
+    () ADC
 }
 
 ' Relationship between the device drivers and the hardware control registers.
-' lcd.c --> LCD
-' lcd.c --> INT
-' ioc.c --> IOC
-' ioc.c --> PORTx
-' ioc.c --> INT
-' gpio.c --> PORTx
-' pwm.c --> PORTx
-' pwm.c --> PWM
-' pwm.c --> PPS
-' adc.c --> ADC
-' adc.c --> INT
-' adc.c --> PORTx
-' rtcc.c --> rtcc
 uart.c --> PORTx
 uart.c --> PPS
 uart.c --> EUSART
 uart.c --> INT
+
+interrupts.c --> INT
+
+fvr.c --> FVR
+
+adc.c --> ADC
 
 @enduml

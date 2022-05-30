@@ -2,16 +2,8 @@
 @startuml driver-uart-write
 skinparam ConditionEndStyle hline
 #LightGreen:write ( unsigned char data )|
-start
-floating note right
-    If Transmit Interrupt is Disabled
-    this means no data is queued in
-    TX_BUFFER to send.
-end note
 if (Is Transmit Interrupt Enabled?) then (yes)
     while (Is TX_BUFFER full?) is (yes)
-        backward :   TX interrupt fires \nand frees up a space;
-        :Block and Wait;
     endwhile (no)
     :Disable Transmit Interrupt;
     :Write data byte to TX_BUFFER;
@@ -19,12 +11,17 @@ if (Is Transmit Interrupt Enabled?) then (yes)
     Decrement TX_BUFFER_REMAINING;
     :Set TX1IE interrupt flag signifying 
           there is data in the buffer;
-    floating note right
+    note left
         This could immediatly
         cause an interrupt.
     end note
 else (no)
     :Write data byte to TX1REG;
+    floating note left
+        If Transmit Interrupt is Disabled
+        this means no data is queued in
+        TX_BUFFER to send.
+    end note
 endif
 #LightSkyBlue:return ( void )]
 end
@@ -34,7 +31,6 @@ end
 @startuml driver-uart-read
 skinparam ConditionEndStyle hline
 #LightGreen:unsigned char read ( void )|
-start
 while (Is there data in RX_BUFFER?) is (no)
 endwhile(yes)
 :Read **data** from RX_BUFFER_TAIL;
@@ -42,39 +38,36 @@ endwhile(yes)
 :Disable Receive Interrupts;
 :Decrement RX_BUFFER_REMAINING;
 :Enable Interrupts;
-floating note left
+note left
     This could immediatly
     cause an interrupt.
 end note
 #LightSkyBlue:return ( **data** )]
-end
 @enduml
 
-' This graph shows the flow of the Transmit Interrupt Service Routine
-@startuml driver-uart-tx-isr
+@startuml driver-uart-isr
 skinparam ConditionEndStyle hline
-#LightGreen:uart_tx_isr ( void )|
-start
-if (Is there data in TX_BUFFER?) then (yes)
-    :Write TX_BUFFER_HEAD to TX1REG;
-    :      Increment TX_BUFFER_TAIL
-    Increment TX_BUFFER_REMAINING;
-else (no)
-    :Disable Transmit Interrupts;
+#LightGreen:uart_isr ( void )|
+if (  Transmit Interrupt Occurred
+and Transmit Interrupt Enabled) then (yes)
+    #LightGreen:uart_tx_isr ( void )|
+    if (Is there data in TX_BUFFER?) then (yes)
+        :Write TX_BUFFER_HEAD to TX1REG;
+        :      Increment TX_BUFFER_TAIL
+        Increment TX_BUFFER_REMAINING;
+    else (no)
+        :Disable Transmit Interrupts;
+    endif
+    #LightSkyBlue:return ( void )]
+(no) elseif (  Receive Interrupt Occurred
+and Receive Interrupt Enabled) then (yes)
+    #LightGreen:uart_rx_isr ( void )|
+    :   Read a byte of data from 
+    RC1REG into RX_BUFFER;
+    :Increment RX_BUFFER_HEAD;
+    :Increment RX_BUFFER_REMAINING;
+    #LightSkyBlue:return ( void )]
+else (No UART Interrupt Occurred)
 endif
 #LightSkyBlue:return ( void )]
-end
-@enduml
-
-' This graph shows the flow of the Receive Interrupt Service Routine
-@startuml driver-uart-rx-isr
-skinparam ConditionEndStyle hline
-#LightGreen:uart_rx_isr ( void )|
-start
-:   Read a byte of data from 
-RC1REG into RX_BUFFER;
-:Increment RX_BUFFER_HEAD;
-:Increment RX_BUFFER_REMAINING;
-#LightSkyBlue:return ( void )]
-end
 @enduml

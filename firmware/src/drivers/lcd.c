@@ -10,8 +10,6 @@
 
 #include <xc.h>
 
-#include "dev_config.h"
-
 #include "drivers/lcd.h"
 
 

@@ -64,12 +64,14 @@ int isr_register (unsigned char int_flag, unsigned char int_mask, isr_func_t int
 void
 isr_unregister (int isr_index)
 {
+    di();
     for (; isr_index < interrupts_registered; isr_index++)
     {
         interrupts_service_routines[isr_index] = \
             interrupts_service_routines[isr_index+1];
     }
     interrupts_registered--;
+    ei();
 }
 
 /**

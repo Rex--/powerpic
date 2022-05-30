@@ -4,13 +4,10 @@
 #include <xc.h>
 #include <stdio.h>
 
-#include "dev_config.h"
-
 #include "drivers/lcd.h"
-#include "lib/display_font.h"
+#include "lib/display_fonts.h"
 
 #include "lib/display.h"
-
 
 
 #if DEV_BUILD

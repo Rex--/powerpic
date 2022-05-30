@@ -9,10 +9,13 @@
 #include <xc.h>
 #include <stdio.h>
 
+// #include "dev_config.h"
+
 #include "drivers/rtcc.h" // TODO: datatime library
 
 #include "lib/isr.h"
 #include "lib/mode.h"
+#include "lib/event.h"
 #include "lib/display.h"
 #include "lib/keypad.h"
 #include "lib/buzzer.h"
@@ -28,35 +31,28 @@ static void time_draw (void);
 static void set_time_start (void);
 static void set_time_thread (mode_config_t *cfg, unsigned int event);
 
+void clock_second_update_isr (void);
 void clock_hour_chime_isr (void);
 
+int update_isr = 0;
+int chime_isr = 0;
 
 void
 clock_init (mode_config_t *cfg)
 {
-    cfg->tickrate = 800;
-    cfg->keymap = 0;
+    cfg->tickrate = 0;
+    cfg->keymap = 1;
 
     // Register isr for hour chime
     //
-    isr_register(8, _PIR8_RTCCIF_MASK, &clock_hour_chime_isr);
+    chime_isr = isr_register(8, _PIR8_RTCCIF_MASK, &clock_hour_chime_isr);
+
 
     // Configure RTC alarm to interrupt every hour forever
     //
-    ALRMCONbits.AMASK = 0b0101;
+    rtcc_set_alarm(0, 1, RTCC_ALARM_HOUR);
     ALRMCONbits.CHIME = 1;
     ALRMRPT = 0xFF;
-
-    // Match on the hour
-    //
-    ALRMMTH = 0;
-    ALRMWD = 0;
-    ALRMDAY = 0;
-    ALRMHR = 0;
-    ALRMMINbits.MINALRMH = 5;
-    ALRMMINbits.MINALRML = 9;
-    ALRMSECbits.SECALRMH = 5;
-    ALRMSECbits.SECALRML = 9;
 
     // Enable RTCC Alarm and its interrupt
     //
@@ -68,6 +64,15 @@ clock_init (mode_config_t *cfg)
 void
 clock_start (mode_config_t *cfg)
 {
+    // Configure alarm interrupt to occur evey second
+    //
+    ALRMCONbits.ALRMEN = 0;
+    rtcc_set_alarm(0, 0, RTCC_ALARM_SECOND);
+    printf("Unregistering %i isr\n\r", chime_isr);
+    isr_unregister(chime_isr);
+    update_isr = isr_register(8, _PIR8_RTCCIF_MASK, &clock_second_update_isr);
+    ALRMCONbits.ALRMEN = 1;
+    
     clock_set = 0;
     clock_fmt = 1;
     display_primary_clear(0);
@@ -85,13 +90,15 @@ clock_thread (mode_config_t *cfg, unsigned int event)
     }
     else if (event == 0x020b)
     {
-        // set_time_start();
-        // clock_set = 1;
+#       if DEV_BUILD
         unsigned char hour =    (unsigned char)(2 << 4) | 3;
         unsigned char minute =  (unsigned char)(5 << 4) | 9;
         unsigned char second =  (unsigned char)(4 << 4) | 5;
-
         rtcc_set_time(hour, minute, second);
+#       else
+        set_time_start();
+        clock_set = 1;
+#       endif
     }
     else if ((event & 0xFF) == KEYPAD_KEY_PRESS_EVENT)
     {
@@ -111,6 +118,9 @@ clock_thread (mode_config_t *cfg, unsigned int event)
             }
             time_draw();
         }
+
+        // Right column controls backlight
+        //
         else if (key == '/' || key == '*' || key == '-' || key == '+')
         {
             LATGbits.LATG7 = 1;
@@ -134,13 +144,27 @@ clock_thread (mode_config_t *cfg, unsigned int event)
 void
 clock_stop (mode_config_t *cfg)
 {
-
+    // Configure alarm interrupt to occur evey hour for hourly chime
+    //
+    ALRMCONbits.ALRMEN = 0;
+    rtcc_set_alarm(0, 1, RTCC_ALARM_HOUR);
+    printf("Unregistering %i isr\n\r", chime_isr);
+    isr_unregister(update_isr);
+    chime_isr = isr_register(8, _PIR8_RTCCIF_MASK, &clock_hour_chime_isr);
+    ALRMCONbits.ALRMEN = 1;
 }
 
 
 static void
 time_draw (void)
 {
+    unsigned char hour_chime = MINUTES + SECONDS;
+
+    if (0 == hour_chime)
+    {
+        buzzer_beep();
+    }
+
     // Display 24 hours time
     display_misc_clear(DISPLAY_MISC_PM);
     display_misc_clear(DISPLAY_MISC_AM);
@@ -284,6 +308,12 @@ set_time_thread (mode_config_t *cfg, unsigned int event)
     }
 }
 
+void
+clock_second_update_isr (void)
+{
+    event_add(0x01, 0x00);
+    PIR8bits.RTCCIF = 0;
+}
 
 void
 clock_hour_chime_isr (void)

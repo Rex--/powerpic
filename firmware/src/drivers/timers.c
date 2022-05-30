@@ -2,8 +2,6 @@
 #include <xc.h>
 #include <stdio.h>
 
-#include "dev_config.h"
-
 #include "drivers/timers.h"
 
 
@@ -43,11 +41,11 @@ timer0_init (void)
     T0CON1bits.T0CS = 0b100;
 #   endif
 
-#   if (2 == PCB_REV)
+// #   if (2 == PCB_REV)
     // clock src SOSC
     //
     T0CON1bits.T0CS = 0b110;
-#   endif
+// #   endif
 
     // not syncd with Fosc to allow for operation during sleep
     T0CON1bits.T0ASYNC = 1;

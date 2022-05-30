@@ -63,13 +63,15 @@ thermometer_thread (mode_config_t *cfg, unsigned int event)
         int temp = ADC_RESULT;
 
         temp = (temp * 0.263 + 50) * 10;
-        
+
+#       if DEV_BUILD
         printf("Temp: %i\n\r", temp);
-        display_primary_clear(0);
+#       endif
+
+        // display_primary_clear(0);
         display_primary_string(1, "temp");
         display_primary_number(0, temp);
-        display_primary_character(7, '*');
-        display_primary_character(8, 'F');
+        display_primary_string(-1, "*F");
 
         if (cfg->tickrate != 60000)
         {

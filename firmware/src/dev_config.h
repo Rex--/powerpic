@@ -5,11 +5,11 @@
 #ifndef DEV_CONFIG_H
 #define	DEV_CONFIG_H
 
-#define _XTAL_FREQ 32000000 /**< The frequency of the oscillator. */
+#define _XTAL_FREQ 4000000 /**< The frequency of the oscillator. */
 
-#define PCB_REV     2
+// #define PCB_REV     2
 
-#define DEV_BUILD   1
+// #define DEV_BUILD   0
 
 #endif /* DEV_CONFIG_H */
 

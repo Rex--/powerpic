@@ -1,6 +1,6 @@
 #include <xc.h>
 
-#include "dev_config.h"
+#include "dev_config.h" // Need _XTAL_FREQ for __delay_ms()
 
 #include "drivers/pwm.h"
 

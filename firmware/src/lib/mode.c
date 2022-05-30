@@ -5,8 +5,6 @@
 #include <xc.h>
 #include <stdio.h>
 
-#include "dev_config.h"
-
 #include "lib/mode.h"
 
 #if DEV_BUILD

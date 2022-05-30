@@ -6,7 +6,6 @@
 #include <xc.h>
 #include <stdio.h>
 
-#include "dev_config.h"
 
 
 typedef struct
@@ -174,6 +173,17 @@ rtcc_datetime_set (datetime_t *dt)
 }
 
 void
+rtcc_alarm_datetime_set (datetime_t *dt)
+{
+    ALRMSEC = dt->second;
+    ALRMMIN = dt->minute;
+    // ALRMHR = dt->hour;
+    // ALRMDAY = dt->day;
+    // ALRMMTH = dt->month;
+    // ALRMWD = dt->weekday;
+}
+
+void
 rtcc_set_time (unsigned char hour, unsigned char minute, unsigned char second)
 {
     datetime_t new_time = *rtcc_datetime_get();
@@ -183,6 +193,19 @@ rtcc_set_time (unsigned char hour, unsigned char minute, unsigned char second)
     new_time.second = second;
 
     rtcc_datetime_set(&new_time);
+}
+
+void
+rtcc_set_alarm (unsigned char minute, unsigned char second, unsigned char mask)
+{
+    datetime_t new_alarm = {
+        .second = second,
+        .minute = minute
+    };
+
+    rtcc_alarm_datetime_set(&new_alarm);
+
+    ALRMCONbits.AMASK = mask;
 }
 
 void

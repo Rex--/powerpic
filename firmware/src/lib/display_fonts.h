@@ -1,6 +1,5 @@
-
-#include "lib/display_font.h"
-
+#ifndef DISPLAY_FONTS_H
+#define DISPLAY_FONTS_H
 
 /**
  * Enum to easily define character segments.
@@ -136,11 +135,11 @@ const unsigned char default_font[] = {
 };
 
 
-
-
 /**
  * Available display fonts.
 */
 const unsigned char * display_fonts[] = {
     &default_font[0],
 };
+
+#endif

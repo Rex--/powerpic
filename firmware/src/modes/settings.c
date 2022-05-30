@@ -16,7 +16,7 @@
 
 
 static const char *settings_menu_str[SETTINGS_MENU_COUNT] = {
-    "LITE",
+    "hello",
     "bEEP",
     "RTCC",
 };
@@ -39,7 +39,7 @@ void    submenu_thread (mode_config_t *cfg, unsigned int event);
 void
 settings_init (mode_config_t *cfg)
 {
-    cfg->tickrate = -1;
+    cfg->tickrate = 0;
     cfg->keymap = KEYPAD_KEYMAP_DIR;
 }
 

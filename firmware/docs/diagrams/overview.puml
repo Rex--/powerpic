@@ -1,0 +1,70 @@
+@startuml overview
+skinparam ComponentStyle rectangle
+
+cloud "PowerOS"
+
+node "Mode Manager" as modemanager
+
+' frame "src/modes/" as modes {
+'     component "Watch"
+'     component "Calculator"
+' }
+
+frame {
+storage "mode"
+storage "event"
+storage "isr"
+
+storage "tick"
+storage "keypad"
+storage "buttons"
+storage "display"
+storage "datetime"
+storage "uart"
+}
+
+' These are our low-level hardware driver components.
+' They communicate directly with the hardware control registers.
+' frame "src/drivers/" as devicedrivers {
+'     database "INT"
+'     database "LCD"
+'     database "RTCC" as rtccdriver
+'     database "IOC"
+'     database "PORTx"
+'     database "UART"
+' }
+
+
+
+
+PowerOS --> modemanager
+PowerOS --> tick
+
+modemanager --> event
+' modemanager --> mode
+modemanager --> buttons
+modemanager --> isr
+
+tick ..> timers
+tick -> isr
+tick -> event
+
+keypad ..> pins
+keypad ..> ioc
+keypad -> event
+keypad -> isr
+
+buttons ..> pins
+buttons ..> ioc
+buttons -> isr
+
+display ..> lcd
+
+datetime ..> rtcc
+datetime -> event
+
+
+
+
+
+@enduml

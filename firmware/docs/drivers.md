@@ -10,6 +10,13 @@ Several Device drivers are available for use:
 
 ![](driver-components.svg)
 
+@section drivers_manager Driver Manager
+
+The Driver Manager is responsible for enabling and configuring the needed device
+drivers. It should be configured by the Mode Manager prior to using any of the
+supported driver peripherials. Each driver provides an init() function that gets
+called from the Driver Manager.
+
 
 @section drivers_uart UART Driver
 
@@ -51,50 +58,18 @@ main (void)
 @subsection drivers_uart_isr Interrupt Service Routines
 
 Two interrupt handlers are need for the driver to function properly:
-- `uart_tx_isr()` - Transmit Interrupt service routine
+- `uart_tx_isr()` - Transmit Interrupt Service Routine
+
 and 
-- `uart_rx_isr()` - Receive Interrupt service routine
 
-These should be called from the main Interrupt Service routine if either of
-their corresponding interrupt enable bits are set.\n
-**Example:**
-```c
-void __interrupt()
-main_isr (void)
-{
-    // Check if the Peripherial Interrupts are enabled.
-    //
-    if (1 == INTCONbits.PEIE) {
+- `uart_rx_isr()` - Receive Interrupt Service Routine
 
-        // USART1 Transmit Interrupt flag
-        //
-        if (1 == PIE3bits.TX1IE && 1 == PIR3bits.TX1IF)
-        {
-            uart_tx_isr();
-        }
+These are called by the driver's main ISR:
+- `uart_isr()` - Driver Interrupt Service Rountine
 
-        // USART1 Receive Interrupt Flag
-        //
-        else if (1 == PIE3bits.RC1IE && 1 == PIR3bits.RC1IF)
-        {
-            uart_rx_isr();
-        }
+The Interrupt Service Routine provided function as follows:
 
-        else
-        {
-            // Unhandled Interrupt
-        }
-    }
-    else
-    {
-        // Unhandled Interrupt
-    }
-}   /* main_isr() */
-```
-
-The Interrupt Service Routines provided function as follows:
-
-![](driver-uart-rx-isr.svg)![](driver-uart-tx-isr.svg)
+![](driver-uart-isr.svg)\n
 
 @subsection drivers_uart_rw Read and Write
 
@@ -106,11 +81,36 @@ are eventually called through wrapper functions `getch()` and `putch()`
 
 ![](driver-uart-read.svg)![](driver-uart-write.svg)
 
+@section drivers_fvr FVR Driver
 
-<!-- @section drivers_ioc Interrupt On Change Driver
+```c
+// FVR Driver Library
+//
+#include "drivers/fvr.h"
+```
 
-`#include drivers/ioc.h`
+The FVR driver provides an interface to interact with the fixed voltage
+reference availblee for use by peripherials. To enable the FVR call the macro
+`FVR_ENABLE`. This will set the FVREN bit of the FVRCON register. A stub
+function is also provided to keep a common interface amoung drivers:
+`fvr_init()` which just calls the enable macro.
 
-The IOC driver provides functions to enable and disable peripherial interrupts.
-This module simply controls the flow of interrupts and doesn't act on them in
-any way. -->
+@subsection drivers_fvr_adc Output to ADC
+
+The FVR has 2 outputs available to the ADC. They are configured as follows:
+- `fvr_adc_set()` - Set adc buffer gain. Available as Buffer 1 on the ADC.
+- `fvr_cda_set()` - Set cda buffer gain. Available as Buffer 2 on the ADC.
+- `fvr_xxx_set(FVR_BUFFER_OFF);` - Disable 'xxx' buffer.
+
+@subsection drivers_fvr_temperature Temperature Sensor
+
+The FVRCON register controls the built-in temperature sensor. It can be
+configured between high and low range. High range provides better resolution
+over the range, but requires a higher Vdd.\n
+The temperature sensor can be configured as follows:
+- `fvr_temperature_sensor_set(uint8_t temperature_settings)`
+
+`temperature_settings` being on of:
+- `FVR_TEMPERATURE_OFF` - Disable the sensor.
+- `FVR_TEMPERATURE_LOW` - Enable the sensor in low mode.
+- `FVR_TEMPERATURE_HIGH` - Enable the sensor in high mode.

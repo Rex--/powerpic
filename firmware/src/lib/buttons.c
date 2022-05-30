@@ -10,8 +10,6 @@
 #include <xc.h>
 #include <stdio.h>
 
-#include "dev_config.h"
-
 #include "drivers/ioc.h"
 #include "drivers/pins.h"
 

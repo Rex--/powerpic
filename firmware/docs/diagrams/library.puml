@@ -47,83 +47,49 @@ powerpic --> datetime.h
 powerpic --> stdio.h
 @enduml
 
-@startuml library-drivers
-skinparam componentStyle rectangle
+'  library-drivers
+' skinparam componentStyle rectangle
 
-' These are the HAL components.
-' They interact with the drivers to provide functionality to "Modes".
-folder "lib/" {
-    frame "Display" {
-        file display.h
-        file display.c
-        display.h <..> display.c
-    }
+' ' These are the HAL components.
+' ' They interact with the drivers to provide functionality to "Modes".
+' folder "lib/" {
+'     frame "Interrupt Manager" {
+'         file interrupt_manager.h
+'         file interrupt_manager.c
+'         interrupt_manager.h <..> interrupt_manager.c
+'     }
 
-    frame "Keypad" {
-        file keypad.h
-        file keypad.c
-        keypad.h <..> keypad.c
-    }
+'     frame "Driver Manager" {
+'         file device_manager.h
+'         file device_manager.c
+'         device_manager.h <..> device_manager.c
+'     }
+'     ' frame "Display" {
+'     '     file display.h
+'     '     file display.c
+'     '     display.h <..> display.c
+'     ' }
+' }
 
-    frame "Buttons" {
-        file buttons.h
-        file buttons.c
-        buttons.h <..> buttons.c
-    }
+' ' These are our low-level hardware driver components.
+' ' They communicate directly with the hardware control registers.
+' folder "drivers/" as devicedrivers {
+'     database "UART" {
+'         file uart.h
+'     }
 
-    frame "Datetime" {
-        file datetime.h
-        file datetime.c
-        datetime.h <..> datetime.c
-    }
+'     database "INT" {
+'         file interrupts.h
+'     }
 
-    frame "Buzzer" {
-        file buzzer.h
-        file buzzer.c
-        buzzer.h <..> buzzer.c
-    }
+'     ' database "LCD" as lcddriver {
+'     '     file lcd.h
+'     ' }
+' }
 
-    frame "Battery" {
-        file battery.h
-        file battery.c
-        battery.h <..> battery.c
-    }
-}
+' ' Relationships between the HAL and the device drivers.
+' interrupt_manager.c --> interrupts.h
+' interrupt_manager.c --> uart.h
 
-' These are our low-level hardware driver components.
-' They communicate directly with the hardware control registers.
-folder "drivers/" as devicedrivers {
-    database "LCD" as lcddriver {
-        file lcd.h
-    }
-
-    database "GPIO" as gpiodriver {
-        file gpio.h
-    }
-
-    database "IOC" as iocdriver {
-        file ioc.h 
-    }
-
-    database "PWM" as pwmdriver {
-        file pwm.h
-    }
-
-    database "ADC" as adcdriver {
-        file adc.h
-    }
-
-    database "RTCC" as rtccdriver {
-        file rtcc.h
-    }
-}
-
-' Relationships between the HAL and the device drivers.
-display.c --> lcd.h
-keypad.c --> ioc.h
-keypad.c --> gpio.h
-buttons.c --> ioc.h
-buzzer.c --> pwm.h
-battery.c --> adc.h
-datetime.c --> rtcc.h
-@enduml
+' device_manager.c --> uart.h
+' 

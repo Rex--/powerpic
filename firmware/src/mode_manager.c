@@ -9,8 +9,10 @@
 #include "lib/event.h"
 #include "lib/mode.h"
 #include "lib/isr.h"
+#include "lib/tick.h"
 #include "lib/display.h"
-#include "lib/buttons.h"    // TODO: remove
+#include "lib/buttons.h"
+#include "lib/keypad.h"
 
 #include "modes/test_mode.h"
 #include "modes/power.h"
@@ -31,11 +33,16 @@ static int next_mode = 0;
 static int adj_mode = 0;
 
 
+
 mode_app_t       managed_modes[MAX_MODES];
 mode_config_t    managed_configs[MAX_MODES];
+static mode_config_t    current_mode_config;
 
 
 int mode_manager_add (char *id, init_t init, start_t start, run_t run, stop_t stop);
+void mode_manager_update_tickrate (void);
+void mode_manager_update_keymap (void);
+void mode_manager_update_font (void);
 
 /**
  * Initializes the Mode Manager for Managing Modes.
@@ -52,7 +59,7 @@ mode_manager_init (void)
     // Next mode to start is 0
     //
     added_modes = 0;
-    current_mode = -1;
+    current_mode = 0;
     next_mode = 0;
 
     // Add modes to be managed
@@ -74,8 +81,11 @@ mode_manager_init (void)
 
     // Start default mode
     //
+    // current_mode_config = managed_configs[next_mode];
+    mode_manager_update_tickrate();
+    mode_manager_update_keymap();
+    mode_manager_update_font();
     mode_start(&managed_modes[next_mode], &managed_configs[next_mode]);
-    current_mode = next_mode;
 
     return;
 }   /* mode_manager_init() */
@@ -138,6 +148,12 @@ mode_manager_thread (unsigned int event)
 
             display_segments_zero();
 
+            // current_mode_config = managed_configs[next_mode];
+
+            mode_manager_update_tickrate();
+            mode_manager_update_keymap();
+            mode_manager_update_font();
+
             mode_start(&managed_modes[next_mode], &managed_configs[next_mode]);
 
             current_mode = next_mode;
@@ -147,32 +163,88 @@ mode_manager_thread (unsigned int event)
     {
         // Pass event to mode app
         mode_run(&managed_modes[current_mode], &managed_configs[current_mode], event);
+
+        // Check if mode changed config
+        //
+        if (managed_configs[current_mode].tickrate != current_mode_config.tickrate)
+        {
+            mode_manager_update_tickrate();
+        }
+        
+        if (managed_configs[current_mode].keymap != current_mode_config.keymap)
+        {
+            mode_manager_update_keymap();
+        }
+        
+        if (managed_configs[current_mode].font != current_mode_config.font)
+        {
+            mode_manager_update_font();
+        }
+
+        // current_mode_config = managed_configs[current_mode];
     }
 }
 
-
-int
-mode_manager_config_update (void)
+void
+mode_manager_update_tickrate (void)
 {
-    return 1;
+    printf("Updating tick to %u from %u\n\r", managed_configs[next_mode].tickrate, current_mode_config.tickrate);
+    current_mode_config.tickrate = managed_configs[next_mode].tickrate;
+    if (0 < current_mode_config.tickrate)
+    {
+        printf("Setting new tickrate\n\r");
+        tick_stop();
+        tick_set_ms(current_mode_config.tickrate);
+        tick_enable_interrupts();
+        tick_reset();
+        tick_start();
+    }
+    else
+    {
+        printf("Disabling tickrate\n\r");
+        tick_stop();
+        tick_disable_interrupts();
+    }
 }
 
-int
-mode_manager_get_tickrate (void)
+void
+mode_manager_update_keymap (void)
 {
-    return managed_configs[current_mode].tickrate;
+    current_mode_config.keymap = managed_configs[next_mode].keymap;
+    keypad_keymap_set(current_mode_config.keymap);
 }
 
-int
-mode_manager_get_keymap (void)
+void
+mode_manager_update_font (void)
 {
-    return managed_configs[current_mode].keymap;
+    current_mode_config.font = managed_configs[next_mode].font;
+    display_set_font(current_mode_config.font);
 }
 
-unsigned char
-mode_manager_get_font (void)
-{
-    return managed_configs[current_mode].font;
-}
+
+// int
+// mode_manager_config_update (void)
+// {
+
+//     return mode_config_needs_update;
+// }
+
+// int
+// mode_manager_get_tickrate (void)
+// {
+//     return managed_configs[current_mode].tickrate;
+// }
+
+// int
+// mode_manager_get_keymap (void)
+// {
+//     return managed_configs[current_mode].keymap;
+// }
+
+// unsigned char
+// mode_manager_get_font (void)
+// {
+//     return managed_configs[current_mode].font;
+// }
 
 /*** EOF ***/

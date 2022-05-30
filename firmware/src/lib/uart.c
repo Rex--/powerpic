@@ -11,8 +11,6 @@
 #include <stdint.h>
 #include <xc.h>
 
-#include "dev_config.h"
-
 #include "drivers/eusart.h"
 
 #include "lib/isr.h"

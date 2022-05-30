@@ -11,7 +11,7 @@
 typedef struct
 {
     /** Mode's tickrate. */
-    int tickrate;
+    unsigned int tickrate;
 
     /** Mode's keymap. */
     unsigned char keymap;

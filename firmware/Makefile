@@ -1,4 +1,11 @@
 ###############################################################################
+#    Firmware Configuration    #
+
+## PCB Major version number
+PCB_REV := 2
+
+
+###############################################################################
 #    Project Configuration    #
 
 ## The name of the project
@@ -37,7 +44,7 @@ TARGET_ARCH := -mcpu=$(MCU)
 
 # Options for the xc8 compiler:
 # -c for compile
-CFLAGS := -O2 -c
+CFLAGS := -O2 -c -DPCB_REV=${PCB_REV}
 
 # Options for xc8 compiler linker
 LFLAGS := -O2
@@ -79,7 +86,7 @@ $(BUILD_DIR)/$(TARGET).hex: $(OBJECTS)
 ################################################################################
 #    Make Commands    #
 
-.PHONY: all info clean clean-all delete flash pro info map imap diagrams documentation docs
+.PHONY: all info clean fclean flash pro me info map imap diagrams documentation docs dev
 
 # Generate our documentation everytime we build as per Barr's Coding Standards
 all: firmware docs
@@ -89,6 +96,12 @@ all: firmware docs
 
 ## Build firmware hexfile
 firmware: $(BUILD_DIR)/$(TARGET).hex
+
+
+## Build firmware in dev mode
+dev_flags:
+	$(eval CFLAGS += -DDEV_BUILD=1)
+dev: dev_flags $(BUILD_DIR)/$(TARGET).hex
 
 ## Generate images from plantuml diagrams
 diagrams:
@@ -128,6 +141,9 @@ flash:
 
 ## Build and flash [pro]ject
 pro: firmware flash
+
+
+me:	clean firmware flash
 
 ##############################
 #    Information Commands    #

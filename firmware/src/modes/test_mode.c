@@ -29,7 +29,7 @@ test_mode_init (mode_config_t *cfg)
     // Default configuration
     //
     cfg->tickrate = 250;
-    cfg->keymap = KEYPAD_KEYMAP_DEFAULT;
+    cfg->keymap = KEYPAD_KEYMAP_CASIO;
     printf("Hello\n\r");
 }
 
@@ -55,9 +55,9 @@ test_mode_edit_start (mode_config_t *cfg)
     display_primary_clear(0);
     display_primary_string(1, "LAYOUT");
     display_primary_character(8, cfg->keymap);
-    if (cfg->keymap != KEYPAD_KEYMAP_DEFAULT)
+    if (cfg->keymap != KEYPAD_KEYMAP_CASIO)
     {
-        cfg->keymap = KEYPAD_KEYMAP_DEFAULT;
+        cfg->keymap = KEYPAD_KEYMAP_CASIO;
     }
     keymap_edit = -1;
 }

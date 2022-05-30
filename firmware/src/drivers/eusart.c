@@ -4,7 +4,6 @@
 
 #include <xc.h>
 
-#include "dev_config.h"
 
 // It'd be real nice to calculate SP1BRG at compilation
 //
@@ -45,7 +44,7 @@ eusart1_tx_init (void)
     // desired baud of 115230 @ 32MHz clock speed- which is close enough to 115200.
     //
     BAUD1CON = 0b01001000;
-    SP1BRGL = 68;
+    SP1BRGL = 103;
 
     // The following registers configure the Transmit and Receive modules:
     // 

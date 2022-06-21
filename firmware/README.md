@@ -8,7 +8,7 @@ The following programs are required to build and flash the firmware:
 - `make`
 - `xc8` - Microchip's C compiler for PICx Devices. I use the AUR package
 `microchip-xc8-bin` which installs version 2.36 of the compiler.
-- `picchick` - Flash PICs using an Arduino. Get it 
+- `picchick` - Flash PICs using an AVR device. Get it 
 [from the repo](https://github.com/rex--/picchick).
 
 

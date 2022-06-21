@@ -7,53 +7,57 @@
 
 // Configuration Word 1
 
-/** External Clock mode - External clock not enabled. **/
+/** External Clock mode - External clock not enabled. */
 #pragma config FEXTOSC = OFF
 
-/** Power-up Oscillator mode - High freq internal oscillator at 1MHz **/
+/** Power-up Oscillator mode.
+ * - High freq internal oscillator at 1MHz 
+*/
 #pragma config RSTOSC = HFINT1
 
-/** Clock out Enable **/
+/** Clock out Enable */
 #pragma config CLKOUTEN = OFF
 
-/** VBAT Pin Enable **/
+/** VBAT Pin Enable */
 #pragma config VBATEN = OFF
 
-/** LCD Charge Pump Enable Bit. **/
+/** LCD Charge Pump Enable Bit. */
 #pragma config LCDPEN = ON
 
-/** Clock Switch Enable **/
+/** Clock Switch Enable */
 #pragma config CSWEN = ON
 
-/** Fail-Safe Clock Monitor Enable **/
+/** Fail-Safe Clock Monitor Enable. */
 #pragma config FCMEN = OFF
 
 
 
 // Configuration Word 2
 
-/** Master Clear Enable **/
+/** Master Clear Enable. */
 #pragma config MCLRE = ON
 
-/** Power-up Timer Selection **/
-#pragma config PWRTE = PWRT_64
+/** Power-up Timer Selection.
+ * We use the internal oscillator so no delay is needed.
+*/
+#pragma config PWRTE = OFF
 
-/** Low-Power BOR Enable **/
+/** Low-Power BOR Enable */
 #pragma config LPBOREN = OFF
 
-/** Brown-out Reset Enable **/
+/** Brown-out Reset Enable */
 #pragma config BOREN = OFF
 
-/** Brown-out Reset Voltage Selection **/
+/** Brown-out Reset Voltage Selection */
 #pragma config BORV = LO
 
-/** Zero-cross detect Disable **/
+/** Zero-cross detect Disable */
 #pragma config ZCD = OFF
 
-/** Peripherial Pin Select one-way control **/
+/** Peripherial Pin Select one-way control */
 #pragma config PPS1WAY = OFF
 
-/** Stack Overflow/Underflow Reset Enable **/
+/** Stack Overflow/Underflow Reset Enable */
 #pragma config STVREN = OFF
 
 
@@ -111,4 +115,4 @@
 #pragma config CP = OFF
 
 
-/* EOF */
+// EOF //

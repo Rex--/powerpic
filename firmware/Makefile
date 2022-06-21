@@ -4,18 +4,18 @@
 ## PCB Major version number
 PCB_REV := 2
 
-## Set to 1 to enable development builds (debug logs, etm.)
-DEV_BUILD := 1
+## Set the log level 0-4 [Disabled, Error, Warning, Info, Debug]
+LOG_LVL := 0
 
 ## Frequency of the clock in Hz
-XTAL_FREQ := 8000000
+XTAL_FREQ := 4000000
 
 
 ################################################################################
 #    Programmer options    #
 
 ## Serial port of a picchick compatible programmer
-PROGRAMMER_PORT := /dev/ttyACM0\
+PROGRAMMER_PORT := /dev/ttyUSB0
 
 
 
@@ -49,7 +49,7 @@ CC := xc8-cc
 TARGET_ARCH := -mcpu=$(MCU)
 
 ## Firmware build options
-FWFLAGS = -D_XTAL_FREQ=${XTAL_FREQ} -DPCB_REV=${PCB_REV} -DDEV_BUILD=${DEV_BUILD}
+FWFLAGS = -D_XTAL_FREQ=${XTAL_FREQ} -DPCB_REV=${PCB_REV} -DLOG_LVL=$(LOG_LVL)
 
 ## Options for the xc8 compiler
 CFLAGS := -O2 -c
@@ -136,9 +136,10 @@ fclean:
 ## Flashes the built hexfile onto a device using picchick
 flash: fw
 	@echo "Flashing..."
-	@picchick \
+	picchick \
 		-d $(MCU) \
-		-p $(PROGRAMMER_PORT) \
+		-P $(PROGRAMMER_PORT) \
+		-B 115200 \
 		--erase \
 		--flash \
 		$(BUILD_DIR)/$(TARGET).hex

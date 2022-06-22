@@ -22,7 +22,7 @@ void    test_stop  (void);
 // If the mode's config never changes, you can declare this const to save a
 // a byte of ram.
 volatile mode_config_t test_config = {
-        .tickrate = 100,
+        .tickrate = 1000,
         .keymap   = KEYMAP_CASIO,
 };
 

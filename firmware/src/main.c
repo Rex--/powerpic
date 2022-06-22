@@ -14,6 +14,7 @@
 #include "lib/events.h"
 #include "lib/tick.h"
 #include "lib/datetime.h"
+#include "lib/alarm.h"
 #include "lib/buttons.h"
 #include "lib/keypad.h"
 #include "lib/backlight.h"
@@ -43,6 +44,7 @@ setup (void)
     // Initialize peripherial libraries:
     // - Timers     (tick.h)
     // - RTCC       (datetime.h)
+    //   - Alarm    (alarm.h)
     // - LCD        (display.h)
     // - Keypad     (keypad.h)
     // - Buttons    (buttons.h)
@@ -51,6 +53,7 @@ setup (void)
     //
     tick_init();
     datetime_init();
+    alarm_init();
     display_init();
     keypad_init();
     buttons_init();

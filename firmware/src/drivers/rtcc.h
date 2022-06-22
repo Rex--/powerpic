@@ -15,12 +15,12 @@ void    rtcc_init(void);
  * Enable the rtcc module.
  * Driver must be initialized first.
 */
-#define rtcc_enable()   RTCCONbits.RTCEN = 1
+#define rtcc_enable()   (RTCCONbits.RTCEN = 1)
 
 /**
  * Disable the rtcc module.
 */
-#define rtcc_disable()   RTCCONbits.RTCEN = 0
+#define rtcc_disable()   (RTCCONbits.RTCEN = 0)
 
 /**
  * Gets the status of the rtcc.
@@ -31,23 +31,28 @@ void    rtcc_init(void);
  * Enable rtcc alarm.
  * Writes to the alarm enable bit are only allowed if writes are enabled.
 */
-#define rtcc_alarm_enable()     ALRMCONbits.ALRMEN = 1
+#define rtcc_alarm_enable()             (ALRMCONbits.ALRMEN = 1)
 
 /**
  * Disable rtcc alarm.
  * Writes to the alarm enable bit are only allowed if writes are enabled.
 */
-#define rtcc_alarm_disable()     ALRMCONbits.ALRMEN = 0
+#define rtcc_alarm_disable()            (ALRMCONbits.ALRMEN = 0)
 
 /**
  * Enable alarm interrupts.
 */
-#define rtcc_alarm_interrupt_enable()   PIE8bits.RTCCIE = 1
+#define rtcc_alarm_interrupt_enable()   (PIE8bits.RTCCIE = 1)
 
 /**
  * Disable alarm interrupts.
 */
-#define rtcc_alarm_interrupt_disable()  PIE8bits.RTCCIE = 0
+#define rtcc_alarm_interrupt_disable()  (PIE8bits.RTCCIE = 0)
+
+/**
+ * Clear alarm interrupt flag.
+*/
+#define rtcc_alarm_interrupt_clear()    (PIR8bits.RTCCIF = 0)
 
 /** Enable RTCC writes. */
 #define rtcc_writes_enable()    RTCCONbits.RTCWREN = 1
@@ -149,7 +154,7 @@ rtcc_alarm_time_set (
 /**
  * Set the drift calibration value.
 */
-#define rtcc_drift_set(drift)   RTCCAL = drift
+#define rtcc_drift_set(drift)   (RTCCAL = (drift))
 
 /**
  * Get the drift calibration value.

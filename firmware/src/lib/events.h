@@ -84,12 +84,13 @@ event_check (void);
 // NOTE: Libraries also implement macros with these values. Should we get rid
 // of them here?
 
-#define EVENT_TICK          0x01    // While this is just the tick event type, it's
-                                    // also able to be used for a tick event id.
+#define EVENT_TICK          0x01    // Ticks
+
+#define EVENT_ALARM         0x0A    // 'A' for alarm
 
 #define EVENT_BUTTON        0x0B    // 'B' for button
 
-#define EVENT_KEYPAD        0x0C    // 'C' for Ceypad :)
+#define EVENT_KEYPAD        0x0C    // 'C' for ceypad :)
 
 #endif
 

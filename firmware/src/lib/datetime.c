@@ -12,6 +12,17 @@
 #include "lib/datetime.h"
 
 
+const char weekday_str[7][3] = {
+    "SU",
+    "MO",
+    "TU",
+    "WE",
+    "TH",
+    "FR",
+    "SA"
+};
+
+
 void
 datetime_init (void)
 {
@@ -113,15 +124,29 @@ datetime_time_now (time_t *t)
     );
 }
 
-const char weekday_str[7][3] = {
-    "SU",
-    "MO",
-    "TU",
-    "WE",
-    "TH",
-    "FR",
-    "SA"
-};
+
+// Date functions
+
+void
+datetime_today (date_t *d)
+{
+    unsigned char *now_date = rtcc_date_get();
+    d->year = *now_date++;
+    d->month = *now_date++;
+    d->day = *now_date++;
+    d->weekday = *now_date;
+
+    // This warns of a stack overflow if you call _today()
+    // from a mode application and have debug logging enabled.
+#   if 0
+    LOG_DEBUG("Today: 20%.2i/%.2i/%.2i",
+        BCD2DEC(d->year),
+        BCD2DEC(d->month),
+        BCD2DEC(d->day)
+        // &weekday_str[d->weekday][0]
+    );
+#   endif
+}
 
 const char *
 datetime_weekday_str (unsigned char weekday)

@@ -10,6 +10,7 @@
 #include "lib/display.h"
 #include "lib/keypad.h"
 #include "lib/buttons.h"
+#include "lib/alarm.h"
 
 #include "modes/test.h"
 
@@ -20,47 +21,74 @@
 #include "lib/logging.h"
 
 
-// String that contains every font character, except punctuation.
-// (it looks bad scrolling)
-//
-static const char *test_str = 
-"the quick brown fox jumps over the lazy dog"
-" 1234567890 "
-"THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG ";
-// Note the trailing space - so we dont have to clear the display.
+time_t alarm_time = {
+    .hour = 0x16,
+    .minute = 0x20,
+    .second = 0x00,
+};
 
+date_t alarm_date = {
+    .day = 0x20,
+    .month = 0x04,   // We never check dates past the day
+    .year = 0x22,
+    .weekday = 0x06
+};
 
-static const char *scroll_ptr = NULL;
+datetime_t alarm_dt;
 
 void
 test_init (void)
 {
     LOG_INFO("Initializing World!");
+
+    // Test alarm_set_datetime()
+    alarm_dt.date = alarm_date;
+    alarm_dt.time = alarm_time;
+    alarm_set_datetime(&alarm_dt, 0xab);
 }
 
 void
 test_start (void)
 {
     LOG_INFO("Starting World!");
-    scroll_ptr = test_str;
+
+    // Test alarm_get()
+    alarm_dt = (datetime_t){0};
+    alarm_get(&alarm_dt);
+
+    LOG_INFO("Alarm datetime: %.2i:%.2i:%.2i 20%.2i/%.2i/%.2i %.2X0A",
+        BCD2DEC(alarm_dt.time.hour),
+        BCD2DEC(alarm_dt.time.minute),
+        BCD2DEC(alarm_dt.time.second),
+        BCD2DEC(alarm_dt.date.year),
+        BCD2DEC(alarm_dt.date.month),
+        BCD2DEC(alarm_dt.date.day),
+        alarm_dt.date.weekday
+    );
 }
 
 void
 test_run (unsigned int event)
 {
     // This will cause problems @ 100ms tickrate
-    // LOG_DEBUG("Running World!");
+    LOG_DEBUG("Running World!");
 
     if (EVENT_TYPE(event) == EVENT_TICK)
     {
-        display_secondary_string(1, scroll_ptr);
-        display_primary_string(1, scroll_ptr);
-        if (*++scroll_ptr == '\0')
-        {
-            scroll_ptr = test_str;
-        }
+
     }
 
+    else if (EVENT_TYPE(event) == EVENT_ALARM)
+    {
+        // Test alarm_set_time()
+        datetime_time_now(&alarm_time);
+        alarm_time.second = 
+            (unsigned char)DEC2BCD(
+                (unsigned char)(BCD2DEC(alarm_time.second) + 10)
+            );
+        alarm_set_time(&alarm_time, 0xFF);
+    }
+    
     else if (EVENT_TYPE(event) == EVENT_KEYPAD)
     {
         LOG_INFO("Keypress: %c", EVENT_DATA(event));
@@ -75,7 +103,6 @@ test_run (unsigned int event)
         if (EVENT_DATA(event) == BUTTON_ADJ_PRESS)
         {
             LOG_INFO("Adj button press");
-            test_config.tickrate = 500;
         }
         if (EVENT_DATA(event) == BUTTON_ADJ_RELEASE)
         {

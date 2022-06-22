@@ -67,6 +67,14 @@ datetime_time_set (time_t *time);
 void
 datetime_time_now (time_t *time);
 
+/**
+ * Gets the current date.
+ * 
+ * @param[out]  date        A pointer to a date object
+*/
+void
+datetime_today (date_t *date);
+
 
 // Below are some helper functions to deal with date and time values.
 // All time and date values are in BCD format.
@@ -81,6 +89,17 @@ datetime_time_now (time_t *time);
  * @returns     Decimal value.
 */
 #define BCD2DEC(val)    ((((val) >> 4) * 10) + ((val) & 0x0F))
+
+/**
+ * Decode decimal value to its binary coded decimal representation.
+ * 
+ * NOTE: This macro supports a limted range of 0-99
+ * 
+ * @param[in]   val     The decimal value to convert.
+ * 
+ * @returns     Binary coded decimal value.
+*/
+#define DEC2BCD(val)    ((((val) / 10) << 4) | ((val) % 10))
 
 /**
  * Get a short string representation of a weekday value.

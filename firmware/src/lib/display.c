@@ -214,28 +214,28 @@ display_primary_string (signed char position, const char *string)
 void
 display_primary_number (signed char position, long number)
 {
-    LOG_DEBUG("Number: %li", number);
-
-    // Fuck your position
-    position = LCD_PRIMARY_CHARACTERS;
-
-    if (0 == number)
+    if (0 < position)
     {
-        display_primary_character(position, 0);
-    }
-    else
-    {
-        unsigned char number_char = 0;
-        while (0 < number && 0 < position)
+        LOG_DEBUG("Number: %li", number);
+
+        if (0 == number)
         {
-            number_char = number % 10;
-
-            display_primary_character(position--, number_char);
-
-            number /= 10;
+            display_primary_character(position, 0);
         }
+        else
+        {
+            unsigned char number_char = 0;
+            while (0 < number && 0 < position)
+            {
+                number_char = number % 10;
+
+                display_primary_character(position--, number_char);
+
+                number /= 10;
+            }
+        }
+        display_needs_update = 1;
     }
-    display_needs_update = 1;
 }
 
 void
@@ -344,60 +344,60 @@ display_secondary_string (signed char position, const char *string)
 void
 display_secondary_number        (signed char position, int number)
 {
-    // Fuck you
-    position = LCD_SECONDARY_CHARACTERS;
-
-    if (0 < number)
+    if (0 < position)
     {
-        if (200 > number)
+        if (0 < number)
         {
-            if (100 == number)
+            if (200 > number)
             {
-                display_secondary_character(2, 0);
-                display_secondary_character(1, 0);
-                lcd_secondary_draw(1, 9);
-            }
-            else if (100 < number)
-            {
-                number -= 100;
-                display_secondary_character(2, (unsigned char)(number % 10));
-                display_secondary_character(1, (unsigned char)(number / 10));
-                lcd_secondary_draw(1, 9);
+                if (100 == number)
+                {
+                    display_secondary_character(2, 0);
+                    display_secondary_character(1, 0);
+                    lcd_secondary_draw(1, 9);
+                }
+                else if (100 < number)
+                {
+                    number -= 100;
+                    display_secondary_character(2, (unsigned char)(number % 10));
+                    display_secondary_character(1, (unsigned char)(number / 10));
+                    lcd_secondary_draw(1, 9);
+                }
+                else
+                {
+                    display_secondary_character(2, number % 10);
+                    if (9 < number)
+                    {
+                        display_secondary_character(1, (unsigned char)(number / 10));
+                    }
+                }
             }
             else
             {
-                display_secondary_character(2, number % 10);
-                if (9 < number)
-                {
-                    display_secondary_character(1, (unsigned char)(number / 10));
-                }
+                display_secondary_character(1, 'E');
+                display_secondary_character(2, 'r');
+            }
+        }
+        else if (0 > number)
+        {
+            number = -number;
+            if (10 > number)
+            {
+                display_secondary_character(1, '-');
+                display_secondary_character(2, (unsigned char)number);
+            }
+            else
+            {
+                display_secondary_character(1, 'E');
+                display_secondary_character(2, 'r');
             }
         }
         else
         {
-            display_secondary_character(1, 'E');
-            display_secondary_character(2, 'r');
+            display_secondary_character(position, 0);
         }
+        display_needs_update = 1;
     }
-    else if (0 > number)
-    {
-        number = -number;
-        if (10 > number)
-        {
-            display_secondary_character(1, '-');
-            display_secondary_character(2, (unsigned char)number);
-        }
-        else
-        {
-            display_secondary_character(1, 'E');
-            display_secondary_character(2, 'r');
-        }
-    }
-    else
-    {
-        display_secondary_character(position, 0);
-    }
-    display_needs_update = 1;
 }
 
 void

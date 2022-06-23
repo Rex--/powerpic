@@ -48,7 +48,7 @@ typedef struct
 
 typedef void (*init_t)   (void);
 typedef void (*start_t)  (void);
-typedef void (*run_t)    (unsigned int event);
+typedef signed char (*run_t)    (unsigned int event);
 typedef void (*stop_t)   (void);
 
 

@@ -118,26 +118,14 @@ mode_thread (void)
     {
         LOG_DEBUG("Handling event: x%.4x", event);
 
-        // Here we intercept all MODE button presses to switch modes.
-        // Eventually i'd like for mode applications to be able to use it too,
-        // but right now it's strictly for switching modes.
-        //
-        if (event == EVENT_ID(EVENT_BUTTON, BUTTON_MODE_PRESS))
+        // Call mode's run function with the event.
+        if (mode_list[mode_selected]->run(event))
         {
-            // Switch modes
+            // If the mode returns 1, we switch to the next mode
             mode_next();
-
-            // All other events belong to the next mode
-            // break; //(no need to break, we will call the run correct funtion)
         }
-
-        // All other events get passed to the mode's run() function.
-        //
         else
         {
-            // Call mode's run function with the event.
-            mode_list[mode_selected]->run(event);
-
             // Update configuration after calls to run() in case they've changed.
             mode_config_update(mode_selected);
         }
@@ -172,8 +160,8 @@ mode_config_update (unsigned char mode)
         //
         tick_reset();
 
-        LOG_DEBUG("Retting tick: %li", mode_config.tickrate);
-        LOG_DEBUG("Tickrate: %li", tick_rate_get());
+        // LOG_DEBUG("Retting tick: %li", mode_config.tickrate);
+        // LOG_DEBUG("Tickrate: %li", tick_rate_get());
     }
 
     // Set mode's desired keymap

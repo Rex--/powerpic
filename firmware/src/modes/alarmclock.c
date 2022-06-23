@@ -60,7 +60,7 @@ alarmclock_start (void)
     }
 }
 
-void
+signed char
 alarmclock_run (unsigned int event)
 {
 
@@ -110,6 +110,11 @@ alarmclock_run (unsigned int event)
 
     if (EVENT_TYPE(event) == EVENT_BUTTON)
     {
+        if (EVENT_DATA(event) == BUTTON_MODE_PRESS)
+        {
+            // Switch modes on mode press
+            return 1;
+        }
         if (EVENT_DATA(event) == BUTTON_ADJ_PRESS)
         {
             // Adj button is used to edit the daily alarm.
@@ -123,6 +128,7 @@ alarmclock_run (unsigned int event)
             alarmclock_edit_start();
         }
     }
+    return 0;
 }
 
 
@@ -174,7 +180,7 @@ alarmclock_edit_start (void)
     display_misc_clear(DISPLAY_MISC_WAVE);
 }
 
-void
+signed char
 alarmclock_edit (unsigned int event)
 {
     if (EVENT_TYPE(event) == EVENT_TICK)
@@ -300,6 +306,28 @@ alarmclock_edit (unsigned int event)
 
     if (EVENT_TYPE(event) == EVENT_BUTTON)
     {
+        if (EVENT_DATA(event) == BUTTON_MODE_PRESS)
+        {
+            // Mode button press advances edit position
+            switch (edit_position)
+            {
+                case 1:     // Hour Tens
+                    edit_position = 2;
+                break;
+
+                case 2:     // Hour Ones
+                    edit_position = 4;
+                break;
+
+                case 4:     // Minute Tens
+                    edit_position = 5;
+                break;
+
+                case 5:     // Minute Ones
+                    edit_position = 1;
+                break;
+            }
+        }
         if (EVENT_DATA(event) == BUTTON_ADJ_PRESS)
         {
             // Adj button is used to confirm alarm and return to display mode
@@ -344,6 +372,7 @@ alarmclock_edit (unsigned int event)
             daily_alarm_draw();
         }
     }
+    return 0;
 }
 
 void

@@ -7,11 +7,11 @@
 #ifndef _alarmclock_h_
 #define _alarmclock_h_
 
-void    alarmclock_init  (void);
-void    alarmclock_start (void);
-void    alarmclock_run   (unsigned int event);
-void    alarmclock_edit  (unsigned int event);
-void    alarmclock_stop  (void);
+void            alarmclock_init  (void);
+void            alarmclock_start (void);
+signed char     alarmclock_run   (unsigned int event);
+signed char     alarmclock_edit  (unsigned int event);
+void            alarmclock_stop  (void);
 
 mode_config_t alarmclock_config = {
         .tickrate = 65535000,

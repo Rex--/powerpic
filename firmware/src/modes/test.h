@@ -9,10 +9,10 @@
 #define _test_h_
 
 // Define our mode functions
-void    test_init  (void);
-void    test_start (void);
-void    test_run   (unsigned int event);
-void    test_stop  (void);
+void            test_init  (void);
+void            test_start (void);
+signed char     test_run   (unsigned int event);
+void            test_stop  (void);
 
 
 // Define our config object. Initialize this with default values.

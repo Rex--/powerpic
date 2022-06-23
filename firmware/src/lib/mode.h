@@ -46,10 +46,11 @@ typedef struct
 } mode_config_t;
 
 
-typedef void (*init_t)   (void);
-typedef void (*start_t)  (void);
+typedef void        (*init_t)   (void);
+typedef void        (*start_t)  (void);
 typedef signed char (*run_t)    (unsigned int event);
-typedef void (*stop_t)   (void);
+typedef void        (*stop_t)   (void);
+typedef void        (*daemon_t) (unsigned int event);
 
 
 /**
@@ -94,6 +95,16 @@ typedef struct
      * This function is called once everytime the user selects another mode.
     */
     stop_t stop;
+
+    /**
+     * Mode application daemon function.
+     * This function is called for every single event that occurs, even when
+     * the mode is not active.
+     * 
+     * TODO: Perhaps it'd be preferrable to 'filter' the events that are sent
+     * to each daemon.
+    */
+    daemon_t daemon;
 
 } mode_app_t;
 

@@ -130,6 +130,16 @@ mode_thread (void)
             mode_config_update(mode_selected);
         }
 
+        // Pass the event to every registered daemon
+        for (int i = 0; i < MODE_MAX_MODES; i++)
+        {
+            if (mode_list[i]->daemon)
+            {
+                LOG_DEBUG("Running daemon: %i", i);
+                mode_list[i]->daemon(event);
+            }
+        }
+
         event = event_get();
     }
 }

@@ -58,6 +58,14 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data);
 void
 alarm_get (datetime_t *alarm_datetime);
 
+/**
+ * Delete the alarm with the event data.
+ * 
+ * @returns The amount of alarms deleted.
+*/
+unsigned char
+alarm_del_event (unsigned char event_data);
+
 
 // Events defines
 //

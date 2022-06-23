@@ -326,6 +326,32 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
     }
 }
 
+unsigned char
+alarm_del_event (unsigned char event_data)
+{
+    unsigned char deleted_alarms = 0;
+
+    // Loop through the registered_alarm list and remove alarms that have the
+    // specified event_data. The event_data is stored in the weekday field.
+
+    for (int i = registered_alarms_count-1; i >= 0; i--)
+    {
+        if (event_data == registered_alarms[i].date.weekday)
+        {
+            // Remove alarm and shift all other up.
+            registered_alarms[i] = (datetime_t){0};
+            deleted_alarms++;
+
+            for (int j = i+1; j < registered_alarms_count; j++)
+            {
+                registered_alarms[j-1] = registered_alarms[j];
+            }
+        }
+    }
+
+    return deleted_alarms;
+}
+
 
 void
 alarm_insert (unsigned char index, datetime_t *alarm_dt)
@@ -366,11 +392,11 @@ alarm_isr (void)
     rtcc_alarm_disable();
 
     // Emit an alarm event with the specified data.
-    event_isr((unsigned char)
+    event_isr((unsigned)
         EVENT_ID(
             ALARM_EVENT,
             registered_alarms[0].date.weekday)
-        );
+    );
 
     // Shift alarms down
     for (int i = 1; i < registered_alarms_count; i++)

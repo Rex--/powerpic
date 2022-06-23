@@ -5,7 +5,7 @@
 PCB_REV := 2
 
 ## Set the log level 0-4 [Disabled, Error, Warning, Info, Debug]
-LOG_LVL := 4
+LOG_LVL := 0
 
 ## Frequency of the clock in Hz
 XTAL_FREQ := 4000000

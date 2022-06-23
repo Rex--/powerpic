@@ -83,6 +83,9 @@ main (void)
     // the system according to the mode's config.
     mode_init();
 
+    // Update display in case started mode drew something
+    display_update();
+
     // Tickrate was configured above, so we can enable ticks.
     // This could be moved to the init() call above.
     tick_enable();

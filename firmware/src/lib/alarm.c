@@ -100,6 +100,9 @@ alarm_set_time (time_t *alarm_time, unsigned char event_data)
                             if (alarm_time->second == SECONDS)
                             {
                                 // ALARM IS RIGHT NOW! PANIC!
+                                // The caller probably wants it tomorrow?
+                                alarm_dt.date.day += 1;
+                                //Subject to change
                             }
                             else
                             {
@@ -302,7 +305,7 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
         alarm_insert((unsigned char)alarm_index, alarm_datetime);
 
         LOG_INFO("Registered alarm (%i/%i) %.2i:%.2i:%.2i %.2i/%.2i x%.2X%.2X",
-            alarm_index,
+            alarm_index+1,
             registered_alarms_count,
             BCD2DEC(alarm_datetime->time.hour),
             BCD2DEC(alarm_datetime->time.minute),
@@ -338,9 +341,16 @@ alarm_del_event (unsigned char event_data)
     {
         if (event_data == registered_alarms[i].date.weekday)
         {
+            LOG_DEBUG("Removing alarm: (x%.2X) %i:%i",
+                registered_alarms[i].date.weekday,
+                registered_alarms[i].time.hour,
+                registered_alarms[i].time.minute
+            );
+
             // Remove alarm and shift all other up.
             registered_alarms[i] = (datetime_t){0};
             deleted_alarms++;
+            registered_alarms_count--;
 
             for (int j = i+1; j < registered_alarms_count; j++)
             {

@@ -74,7 +74,7 @@ main (void)
     // (Eventually we should load this from EEPROM or something)
     datetime_t fourtwenty = {
         .date = {0x22, 0x04, 0x20, 0x00},
-        .time = {0x16, 0x19, 0x50},
+        .time = {0x15, 0x59, 0x00},
     };
     datetime_set(&fourtwenty);
 

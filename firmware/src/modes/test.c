@@ -8,6 +8,7 @@
 #include "lib/mode.h"
 #include "lib/events.h"
 #include "lib/buttons.h"
+#include "lib/keypad.h"
 
 #include "modes/test.h"
 
@@ -37,7 +38,8 @@ test_run (unsigned int event)
 
     if (EVENT_TYPE(event) == EVENT_TICK)
     {
-
+        datetime_t dt;
+        datetime_now(&dt);  // Debug print current time
     }
 
     else if (EVENT_TYPE(event) == EVENT_ALARM)
@@ -64,6 +66,7 @@ test_run (unsigned int event)
         if (EVENT_DATA(event) == BUTTON_ADJ_PRESS)
         {
             LOG_INFO("Adj button press");
+            event_add(0x0C0A);  // Send an hourly chime alarm event
         }
         if (EVENT_DATA(event) == BUTTON_ADJ_RELEASE)
         {

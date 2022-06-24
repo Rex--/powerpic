@@ -12,14 +12,18 @@
 #include "lib/display.h"
 #include "lib/keypad.h"
 #include "lib/buttons.h"
+#include "lib/buzzer.h"
 
 #include "modes/alarmclock.h"
+
+#define LOG_TAG "mode.alarmclock"
+#include "lib/logging.h"
 
 // Time object that holds our daily alarm. If the seconds is 0, alarm
 // is disabled. If the seconds is 1, alarm is enabled.
 static time_t daily_alarm = {
-    .hour   = 0x12,
-    .minute = 0x05,
+    .hour   = 0x16,
+    .minute = 0x20,
     .second = 0x00
 };
 
@@ -31,6 +35,7 @@ static time_t hourly_alarm = {0};
 void daily_alarm_draw (void);
 void daily_alarm_edit_draw (void);
 void alarmclock_edit_start (void);
+void hourly_alarm_update (void);
 
 void
 alarmclock_init (void)
@@ -84,11 +89,14 @@ alarmclock_run (unsigned int event)
             {
                 hourly_alarm.second = 0;
                 display_misc_clear(DISPLAY_MISC_BELL);
+                alarm_del_event(ALARMCLOCK_EVENT_CHIME);
             }
             else
             {
                 hourly_alarm.second = 1;
                 display_misc(DISPLAY_MISC_BELL);
+                hourly_alarm_update();
+                alarm_set_time(&hourly_alarm, ALARMCLOCK_EVENT_CHIME);
             }
         }
 
@@ -99,11 +107,15 @@ alarmclock_run (unsigned int event)
             {
                 daily_alarm.second = 0;
                 display_misc_clear(DISPLAY_MISC_WAVE);
+
+                alarm_del_event(ALARMCLOCK_EVENT_DAILY);
             }
             else
             {
                 daily_alarm.second = 1;
                 display_misc(DISPLAY_MISC_WAVE);
+
+                alarm_set_time(&daily_alarm, ALARMCLOCK_EVENT_DAILY);
             }
         }
     }
@@ -136,6 +148,60 @@ void
 alarmclock_stop (void)
 {
 
+}
+
+static unsigned char daily_alarm_is_beeping = 0;
+
+void
+alarmclockd (unsigned int event)
+{
+    if (EVENT_TYPE(event) == EVENT_ALARM)
+    {
+        if (EVENT_DATA(event) == ALARMCLOCK_EVENT_CHIME)
+        {
+            LOG_DEBUG("Chime alarm event event");
+            // Beep Block Beep
+            buzzer_tone(4500, 100, 20);
+            __delay_ms(20);
+            buzzer_tone(4500, 100, 20);
+
+            // Update hourly alarm to new time
+            hourly_alarm_update();
+
+            // Register alarm
+            alarm_set_time(&hourly_alarm, ALARMCLOCK_EVENT_CHIME);
+        }
+
+        if (EVENT_DATA(event) == ALARMCLOCK_EVENT_DAILY)
+        {
+            LOG_DEBUG("Daily alarm event");
+            // 20 sec long alarm
+            // Disabled with any button press
+
+            // NOTE: Since our buzzer and delays block right now, we just give
+            // a few beeps. (This means you can't silence it)
+            // daily_alarm_is_beeping = 1;
+            buzzer_tone(3200, 100, 20);
+            __delay_ms(20);
+            buzzer_tone(3200, 100, 20);
+            __delay_ms(20);
+            buzzer_tone(3200, 100, 20);
+
+
+            // Set another alarm for our daily time, this should be
+            // automatically set for tomorrow since the time has passed.
+            alarm_set_time(&daily_alarm, ALARMCLOCK_EVENT_DAILY);
+        }
+    }
+
+    if (daily_alarm_is_beeping &&
+        ((EVENT_TYPE(event) == EVENT_KEYPAD) || 
+        (EVENT_TYPE(event) == EVENT_BUTTON)))
+    {
+        // Daily alarm is beeping, any button or keypress silences it.
+        LOG_DEBUG("Silencing daily alarm");
+        daily_alarm_is_beeping = 0;
+    }
 }
 
 
@@ -357,6 +423,11 @@ alarmclock_edit (unsigned int event)
             if (daily_alarm.second)
             {
                 // Alarm is enabled, register alarm
+                
+                // Delete any alarms with the old time
+                alarm_del_event(ALARMCLOCK_EVENT_DAILY);
+
+                alarm_set_time(&daily_alarm, ALARMCLOCK_EVENT_DAILY);
 
                 // Enable indicator
                 display_misc(DISPLAY_MISC_WAVE);
@@ -373,6 +444,41 @@ alarmclock_edit (unsigned int event)
         }
     }
     return 0;
+}
+
+
+void
+hourly_alarm_update (void)
+{
+    unsigned char chime_enabled = hourly_alarm.second;
+
+    datetime_time_now(&hourly_alarm);
+
+    if (0x23 == hourly_alarm.hour)
+    {
+        // Handle rollover
+        hourly_alarm.hour = 0x00;
+    }
+    else if (0x09 == hourly_alarm.hour)
+    {
+        // Handle jump from 0x09 to 0x10
+        hourly_alarm.hour = 0x10;
+    }
+    else if (0x19 == hourly_alarm.hour)
+    {
+        // handle jump from 0x19 to 0x20
+        hourly_alarm.hour = 0x20;
+    }
+    else
+    {
+        hourly_alarm.hour += 1;
+    }
+    
+    // Clear minutes
+    hourly_alarm.minute = 0x00;
+
+    // Reset chime to old value
+    hourly_alarm.second = chime_enabled;
 }
 
 void

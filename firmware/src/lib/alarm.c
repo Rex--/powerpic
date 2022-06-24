@@ -341,20 +341,21 @@ alarm_del_event (unsigned char event_data)
     {
         if (event_data == registered_alarms[i].date.weekday)
         {
-            LOG_DEBUG("Removing alarm: (x%.2X) %i:%i",
+            LOG_DEBUG("Removing alarm: (x%.2X) %.2i:%.2i",
                 registered_alarms[i].date.weekday,
-                registered_alarms[i].time.hour,
-                registered_alarms[i].time.minute
+                BCD2DEC(registered_alarms[i].time.hour),
+                BCD2DEC(registered_alarms[i].time.minute)
             );
 
             // Remove alarm and shift all other up.
-            registered_alarms[i] = (datetime_t){0};
+            // registered_alarms[i] = (datetime_t){0};
             deleted_alarms++;
             registered_alarms_count--;
 
             for (int j = i+1; j < registered_alarms_count; j++)
             {
-                registered_alarms[j-1] = registered_alarms[j];
+                registered_alarms[j-1].time = registered_alarms[j].time;
+                registered_alarms[j-1].date = registered_alarms[j].date;
             }
         }
     }
@@ -369,7 +370,8 @@ alarm_insert (unsigned char index, datetime_t *alarm_dt)
     // Shift alarms behind 
     for (int i = registered_alarms_count; i >= index; i--)
     {
-        registered_alarms[i+1] = registered_alarms[i];
+        registered_alarms[i+1].time = registered_alarms[i].time;
+        registered_alarms[i+1].date = registered_alarms[i].date;
     }
 
     // Insert alarm at the index
@@ -411,7 +413,8 @@ alarm_isr (void)
     // Shift alarms down
     for (int i = 1; i < registered_alarms_count; i++)
     {
-        registered_alarms[i-1] = registered_alarms[i];
+        registered_alarms[i-1].time = registered_alarms[i].time;
+        registered_alarms[i-1].date = registered_alarms[i].date;
     }
 
     // Decrement count of registered alarms

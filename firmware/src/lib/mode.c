@@ -103,6 +103,9 @@ mode_next (void)
     // Set configuration values if they have changed.
     mode_config_update(mode_selected_next);
 
+    // Reset the tick timer to get a full tick.
+    tick_reset();
+
     // Set new selected mode.
     //
     mode_selected = mode_selected_next;
@@ -128,6 +131,12 @@ mode_thread (void)
         {
             // Update configuration after calls to run() in case they've changed.
             mode_config_update(mode_selected);
+
+            // Reset tick if it was a tick event.
+            if (EVENT_TYPE(event) == EVENT_TICK)
+            {
+                tick_reset();
+            }
         }
 
         // Pass the event to every registered daemon
@@ -163,15 +172,6 @@ mode_config_update (unsigned char mode)
         tick_rate_set(mode_config.tickrate);
 
         LOG_DEBUG("Updating tickrate: %li", mode_config.tickrate);
-    }
-    else
-    {
-        // We still reset the timer to get a full tick.
-        //
-        tick_reset();
-
-        // LOG_DEBUG("Retting tick: %li", mode_config.tickrate);
-        // LOG_DEBUG("Tickrate: %li", tick_rate_get());
     }
 
     // Set mode's desired keymap

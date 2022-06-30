@@ -53,6 +53,7 @@ alarmclock_start (void)
     display_secondary_string(1, "AL");
 
     // Draw the daily alarm
+    display_primary_clear(0);
     daily_alarm_draw();
 
     if (daily_alarm.second)
@@ -150,7 +151,9 @@ alarmclock_run (unsigned int event)
 void
 alarmclock_stop (void)
 {
-
+    // Clear AM/PM for next mode
+    display_misc_clear(DISPLAY_MISC_AM);
+    display_misc_clear(DISPLAY_MISC_PM);
 }
 
 static unsigned char daily_alarm_is_beeping = 0;

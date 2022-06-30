@@ -8,6 +8,7 @@
 
 #include "lib/mode.h"
 #include "lib/events.h"
+#include "lib/tick.h"
 #include "lib/alarm.h"
 #include "lib/display.h"
 #include "lib/keypad.h"
@@ -46,6 +47,8 @@ alarmclock_init (void)
 void
 alarmclock_start (void)
 {
+    // Tickrate is disabled by default and that's what we want
+
     // Draw 'AL' in corner
     display_secondary_string(1, "AL");
 
@@ -135,7 +138,7 @@ alarmclock_run (unsigned int event)
             alarmclock_mode.run = &alarmclock_edit;
 
             // Set tickrate to our blink rate
-            alarmclock_config.tickrate = 500;
+            tick_rate_set_ms(500);
 
             alarmclock_edit_start();
         }
@@ -436,7 +439,8 @@ alarmclock_edit (unsigned int event)
             // Set the run thread to be our main run thread
             alarmclock_mode.run = &alarmclock_run;
 
-            alarmclock_config.tickrate = 65535000;
+            // Disable ticks
+            tick_disable();
 
             // There might be a 0 in the hour tens place if hour < 10
             display_primary_clear(1);

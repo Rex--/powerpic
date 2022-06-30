@@ -54,7 +54,7 @@ void    timer0_init (void);
  * 
  * @param[in] value 16-bit Timer value
 */
-#define timer0_set(value) TMR0H = value >> 8; TMR0L = value & 0xFF
+#define timer0_set(value) TMR0H = (value) >> 8; TMR0L = (value) & 0xFF
 
 /**
  * Get timer0 value.

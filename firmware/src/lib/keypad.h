@@ -20,11 +20,6 @@
 #define KEYPAD_EVENT_PRESS      0x0C
 #define KEYPAD_EVENT_RELEASE    0x1C
 
-// Included keymaps
-//
-#define KEYPAD_KEYMAP_CODES     0   // Raw keycodes 0-15
-#define KEYPAD_KEYMAP_CASIO     1   // Default keymapping, printed on the watch.
-
 /**
  * Initialize the keypad.
  * Events will be generated for every press and release event.

@@ -38,29 +38,31 @@ void
 tick_disable (void);
 
 /**
- * Set the tick rate.
- * This sets how often a tick interrupt is generated.
+ * Set the tickrate in milliseconds.
+ * This uses a 1:32 prescaler for a 32.768KHz clock, so ticks are ~1ms.
+ * Tickrates below ~150 ms can get iffy if your mode run function takes a while.
 */
-void tick_rate_set (long rate);
+void
+tick_rate_set_ms (unsigned int ms);
+
+/**
+ * Set the tickrate in seconds.
+ * This uses a 1:32768 prescaler for a 32.768KHz clock, so tick are pretty darn
+ * close to 1 second.
+ * NOTE: tick_rate_set_s() feels weird.
+*/
+void
+tick_rate_set_sec (unsigned int sec);
 
 /**
  * Get the current tickrate.
 */
-long tick_rate_get (void);
-
-/**
- * Set the tick prescaler.
- * This modifies the tick clock prescaler to allow a wider range of tickrates.
- * Setting a tickrate automatically figures out the best prescaler value and
- * sets it, so no need to manually change this.
-*/
-void tick_prescaler_set (unsigned char scale);
+unsigned int tick_rate_get (void);
 
 /**
  * Get the current tick prescaler.
 */
 unsigned char tick_prescaler_get (void);
-
 
 /**
  * Reset the tick timer to the tickrate.

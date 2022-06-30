@@ -16,23 +16,22 @@
 #undef  LOG_TAG
 #define LOG_TAG "lib.tick"
 
-#define TICK_MAX_FINE   65535
-#define TICK_PRESCALER_FINE     0b0101
 
-#define TICK_MAX_COURSE 65535000
-#define TICK_PRESCALER_COURSE   0b1111
+#define TICK_PRESCALER_MS       0b0101
+
+#define TICK_PRESCALER_SEC      0b1111
 
 
 static void tick_isr (void);
 
 /** The tickrate currently configured. */
-static long tick_rate;
+static unsigned int tick_rate;
 
-/**
- * The tickrate that has been scaled.
- * This is the timer value to achieve our desired tickrate.
-*/
-static unsigned int  tick_rate_scaled;
+/** The timer value to start couting from. */
+static unsigned int tick_timer_seed;
+
+/** The prescaler currently configured. */
+static unsigned char tick_prescaler;
 
 /**
  * Tick counter for tick events.
@@ -71,67 +70,64 @@ tick_disable (void)
 }
 
 void
-tick_rate_set (long rate)
+tick_rate_set_ms (unsigned int ms)
 {
-    // Get the absolute value of rate. Eventually negative will do something.
-    //
-    rate = labs(rate);
-
-    // Disable tick to prevent interrupts while setting a new tickrate.
+    // Stop tick timer to prevent interrupts while setting a new tickrate.
     //
     tick_disable();
 
-    LOG_INFO("Setting tickrate to %li", rate);
-    tick_rate = rate;
+    LOG_INFO("Setting tickrate: %u ms", ms);
 
-    // If the mode requests a 0 rate, we disable ticks.
-    // NOTE: This will proably be moved to -1 eventually.
-    // MOTE: 0 will loop without delay
-    //
-    if (rate)
-    {
-        // If our tickrate is less than 65535, we use 1:32 or FINE prescaler.
-        // This allows ~1ms granularity in tickrates.
-        if (TICK_MAX_FINE > rate)
-        {
-            LOG_DEBUG("Setting prescaler to FINE");
-            tick_rate_scaled = TICK_MAX_FINE - (unsigned int)rate;
-            timer0_prescaler_set(TICK_PRESCALER_FINE);
-        }
+    // Record our new config.
+    tick_rate = ms;
+    tick_timer_seed = (65535 - tick_rate) + 1;
+    tick_prescaler = TICK_PRESCALER_MS;
 
-        // Else we use the 1:32768 or COURSE prescaler. This only allows ~1s
-        // granularity in tickrates but allows us a max tickrate of
-        // 65,535,000ms or ~1 hour. Eventually we could have 'subticks' and
-        // allow longer tickrates but maybe the mode that needs that long should
-        // refactor.
-        //
-        else
-        {
-            LOG_DEBUG("Setting prescaler to COURSE");
-            tick_rate_scaled = TICK_MAX_FINE - (unsigned int)(rate / 1000);
-            timer0_prescaler_set(TICK_PRESCALER_COURSE);
-        }
+    // Set prescaler to 1:32
+    timer0_prescaler_set(TICK_PRESCALER_MS);
 
-        // After scaling our tickrate and setting the prescaler we set the
-        // timer value and start it ticking.
-        //
-        LOG_DEBUG("Scaled tickrate is %u", tick_rate_scaled);
-        timer0_set(tick_rate_scaled);
-        tick_enable();
-    }
+    // Seed timer with our new tickrate
+    timer0_set(tick_timer_seed);
 
-    // Our tickrate is 0, we disable ticks entirely.
-    //
-    else
-    {
-        tick_disable();
-    }
+    // Start tick ticking
+    tick_enable();
+
 }
 
-long
+void
+tick_rate_set_sec (unsigned int sec)
+{
+    // Stop tick timer to prevent interrupts while setting a new tickrate.
+    //
+    tick_disable();
+
+    LOG_INFO("Setting tickrate: %u sec", sec);
+
+    // Record our new config.
+    tick_rate = sec;
+    tick_timer_seed = (65535 - tick_rate) + 1;
+    tick_prescaler = TICK_PRESCALER_SEC;
+
+    // Set prescaler to 1:32768
+    timer0_prescaler_set(TICK_PRESCALER_SEC);
+
+    // Seed timer with our new tickrate
+    timer0_set(65535-tick_rate);
+
+    // Start tick ticking
+    tick_enable();
+}
+
+unsigned int
 tick_rate_get (void)
 {
     return tick_rate;
+}
+
+unsigned char
+tick_prescaler_get (void)
+{
+    return tick_prescaler;
 }
 
 void
@@ -140,10 +136,10 @@ tick_reset (void)
     // We can't reset this here because the tick is reset after every tick
     // event is processed. So the other function is needed.
     // tick_counter = 0; 
-    timer0_set(tick_rate_scaled);
+    timer0_set(tick_timer_seed);
 
     // Enable ticks if they aren't already
-    tick_enable();
+    // tick_enable();
 }
 
 void
@@ -162,7 +158,7 @@ tick_isr (void)
     timer0_interrupt_clear();
 
     // Reset tick timer.
-    timer0_set(tick_rate_scaled);
+    timer0_set(tick_timer_seed);
 }
 
 // EOF //

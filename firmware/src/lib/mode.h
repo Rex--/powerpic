@@ -22,29 +22,6 @@
 #ifndef _mode_h_
 #define _mode_h_
 
-/**
- * Mode application configuration.
- * This value is passed to each function. Should be initialized in the
- * mode's init() function.
-*/
-typedef struct
-{
-    /**
-     * Mode tickrate.
-     * The tickrate is specified in milliseconds. Anything above 65,535ms is
-     * only configurable down to the second (1,000 ms). The max tickrate
-     * available is 65,535 seconds (65,535,000 ms)
-    */
-    long tickrate;
-
-    /**
-     * Mode's keymap.
-     * This specifies the keymap to use for keypad events.
-    */
-    unsigned char keymap;
-
-} mode_config_t;
-
 
 typedef void        (*init_t)   (void);
 typedef void        (*start_t)  (void);
@@ -65,11 +42,6 @@ typedef struct
      * TODO: Mode's ID might should be a fixed length array?
     */
     const char *id;
-
-    /**
-     * Pointer to the mode's config object.
-    */
-    mode_config_t *config;
 
     /**
      * Mode application initialization function.

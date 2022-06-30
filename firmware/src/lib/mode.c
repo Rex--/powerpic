@@ -20,18 +20,14 @@
 /** This value holds the currently selected mode. */
 static unsigned char mode_selected = 0;
 
-/** This value holds the current mode config that is applied to the system. */
-static mode_config_t mode_config = {0};
-
-
 /**
- * Update the config based on a given mode's index.
- * This function updates the configuration values based on the mode's config.
- * It then copies these configuration values to mode_config. It makes no
- * attempt to keep in sync with the current selected mode.
+ * Reset various libs to defaults.
+ * This reset libraries that are configurable by mode applications including:
+ * - tickrate
+ * - keypad keymap
 */
 static void
-mode_config_update (unsigned char mode);
+mode_config_defaults (void);
 
 
 void
@@ -49,30 +45,18 @@ mode_init (void)
         mode_list[i]->init();
     }
 
-    // We don't need the tickrate or keymap set because no events will be
-    // passed to the startup function.
-    // NOTE: What if an event happens between init and now?
-    // mode_config_update(0);
+    // Reset libs n' things to a default state
+    mode_config_defaults();
 
-    // Configure and Start our default mode (index 0)
-    //
+    // Start our default mode (index 0)
     mode_list[0]->start();
-
-    // We configure tickrate etc after we start the mode in case the
-    // configuration gets changed in the startup routine.
-    //
-    mode_config_update(0);
-
 }
 
 void
 mode_next (void)
 {
-    // Stop the tick timer to prevent interrupts.
+    // Disable to prevent tick events.
     tick_disable();
-    
-    // Go ahead and reset the tick counter for the next mode.
-    tick_counter_reset();
 
     // Get the next mode's index in the list
     //
@@ -93,21 +77,13 @@ mode_next (void)
     // Stop the mode that is currently selected.
     mode_list[mode_selected]->stop();
 
-    // Set config values based on next mode.
-    mode_config_update(mode_selected_next);
+    // Reset libs n' things to a default state
+    mode_config_defaults();
 
     // Start the next mode.
-    //
     mode_list[mode_selected_next]->start();
 
-    // Set configuration values if they have changed.
-    mode_config_update(mode_selected_next);
-
-    // Reset the tick timer to get a full tick.
-    tick_reset();
-
     // Set new selected mode.
-    //
     mode_selected = mode_selected_next;
 }
 
@@ -127,17 +103,6 @@ mode_thread (void)
             // If the mode returns 1, we switch to the next mode
             mode_next();
         }
-        else
-        {
-            // Update configuration after calls to run() in case they've changed.
-            mode_config_update(mode_selected);
-
-            // Reset tick if it was a tick event.
-            if (EVENT_TYPE(event) == EVENT_TICK)
-            {
-                tick_reset();
-            }
-        }
 
         // Pass the event to every registered daemon
         for (int i = 0; i < MODE_MAX_MODES; i++)
@@ -154,37 +119,15 @@ mode_thread (void)
 }
 
 
-
 static void
-mode_config_update (unsigned char mode)
+mode_config_defaults (void)
 {
-    LOG_DEBUG("Updating Mode config values: %i", mode);
-    // Set config values based on the given index
-    // mode_config = *mode_list[mode]->config;
-
-    // Set mode's desired tickrate.
-    //
-    if (mode_list[mode]->config->tickrate != tick_rate_get())
-    {
-        // Only set the tickrate if it's changed.
-        //
-        mode_config.tickrate = mode_list[mode]->config->tickrate;
-        tick_rate_set(mode_config.tickrate);
-
-        LOG_DEBUG("Updating tickrate: %li", mode_config.tickrate);
-    }
-
-    // Set mode's desired keymap
-    //
-    if (mode_list[mode]->config->keymap != keypad_keymap_get())
-    {
-        // Only set keymap if it's changed
-        //
-        mode_config.keymap = mode_list[mode]->config->keymap;
-        keypad_keymap_set(mode_config.keymap);
-
-        LOG_DEBUG("Updating keymap: %i", mode_config.keymap);
-    }
+    // Default tick settings: Disabled
+    tick_disable();
+    tick_counter_reset();
+    
+    // Default keypad keymap: Casio
+    keypad_keymap_set(KEYMAP_CASIO);
 }
 
 // EOF //

@@ -17,14 +17,9 @@ signed char     alarmclock_edit  (unsigned int event);
 void            alarmclock_stop  (void);
 void            alarmclockd      (unsigned int event);
 
-mode_config_t alarmclock_config = {
-        .tickrate = 65535000,
-        .keymap   = KEYMAP_CASIO,
-};
 
 mode_app_t alarmclock_mode = {
         "alarmclock",
-        &alarmclock_config,
         &alarmclock_init,
         &alarmclock_start,
         &alarmclock_run,

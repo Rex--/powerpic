@@ -7,8 +7,10 @@
 
 #include "lib/mode.h"
 #include "lib/events.h"
+#include "lib/tick.h"
 #include "lib/buttons.h"
 #include "lib/keypad.h"
+#include "lib/alarm.h"
 
 #include "modes/test.h"
 
@@ -28,6 +30,9 @@ void
 test_start (void)
 {
     LOG_INFO("Starting World!");
+
+    // Set tickrate to 1s
+    tick_rate_set_sec(1);
 }
 
 signed char

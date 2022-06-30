@@ -17,6 +17,7 @@ XTAL_FREQ := 4000000
 ## Serial port of a picchick compatible programmer
 PROGRAMMER_PORT := /dev/ttyUSB0
 
+PROGRAMMER_BAUD := 115200
 
 
 
@@ -139,7 +140,7 @@ flash: fw
 	picchick \
 		-d $(MCU) \
 		-P $(PROGRAMMER_PORT) \
-		-B 115200 \
+		-B $(PROGRAMMER_BAUD) \
 		--erase \
 		--flash \
 		$(BUILD_DIR)/$(TARGET).hex

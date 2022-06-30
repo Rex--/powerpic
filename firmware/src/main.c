@@ -102,6 +102,13 @@ main (void)
             // Update the display after running the mode.
             display_update();
         }
+
+        // Go to sleep. An interrupt will wake us up when something happens.
+        SLEEP();
+
+        // The instruction after sleep is always executed first when waking up.
+        // This NOP makes sure we don't do anything weird.
+        NOP();
     }
 }
 

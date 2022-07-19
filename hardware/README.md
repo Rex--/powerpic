@@ -1,5 +1,9 @@
 # PowerPIC Hardware
 
+Checkout my [website](https://rexploits.com/powerpic/hardware/) for pictures and more information.
+
+## Changelog
+
 **Version 2.0**
 - Added experimental backlight.
 - Added RTC crystal for accurate timekeeping.

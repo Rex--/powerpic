@@ -73,7 +73,7 @@ clock_run (unsigned int event)
     {
         if (EVENT_DATA(event) == '/')
         {
-            // Divide key shows full data
+            // Divide key shows full date
         }
     }
 
@@ -318,8 +318,13 @@ clock_draw_now (void)
             // AM
             if ((now.time.hour >> 4))
             {
-                // Don't display 0's
+                // Only display digits > 0
                 display_primary_character(1, (now.time.hour >> 4));
+            }
+            else
+            {
+                // Clear digit instead of displaying 0
+                display_primary_clear(1);
             }
             display_primary_character(2, (now.time.hour & 0x0F));
             display_misc(DISPLAY_MISC_AM);

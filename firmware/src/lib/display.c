@@ -413,7 +413,7 @@ display_secondary_clear (signed char position)
     }
     else
     {
-        for (position = 0; position < 2; position++)
+        for (position = 1; position < 3; position++)
         {
             for (seg = 0; seg < LCD_SECONDARY_CHARACTER_SEGMENTS; seg++)
             {

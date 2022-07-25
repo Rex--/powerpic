@@ -9,7 +9,6 @@
 void            clock_init  (void);
 void            clock_start (void);
 signed char     clock_run   (unsigned int event);
-signed char     clock_edit  (unsigned int event);
 void            clock_stop  (void);
 
 mode_app_t clock_mode = {

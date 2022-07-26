@@ -167,9 +167,9 @@ alarmclockd (unsigned int event)
         {
             LOG_DEBUG("Chime alarm event event");
             // Beep Block Beep
-            buzzer_tone(4500, 100, 20);
-            __delay_ms(20);
-            buzzer_tone(4500, 100, 20);
+            buzzer_tone(4500, 100, 75);
+            __delay_ms(100);
+            buzzer_tone(4500, 100, 75);
 
             // Update hourly alarm to new time
             hourly_alarm_update();
@@ -187,11 +187,11 @@ alarmclockd (unsigned int event)
             // NOTE: Since our buzzer and delays block right now, we just give
             // a few beeps. (This means you can't silence it)
             // daily_alarm_is_beeping = 1;
-            buzzer_tone(3200, 100, 20);
-            __delay_ms(20);
-            buzzer_tone(3200, 100, 20);
-            __delay_ms(20);
-            buzzer_tone(3200, 100, 20);
+            buzzer_tone(3200, 100, 75);
+            __delay_ms(50);
+            buzzer_tone(3200, 100, 75);
+            __delay_ms(50);
+            buzzer_tone(3200, 100, 75);
 
 
             // Set another alarm for our daily time, this should be

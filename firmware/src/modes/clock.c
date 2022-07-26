@@ -29,7 +29,7 @@ static void clock_draw_edit (void);
 static void clock_edit_next (void);
 
 // Needed variables
-static unsigned char clock_fmt = 0; // 24/12 HR time format flag
+static volatile unsigned char clock_fmt = 0; // 24/12 HR time format flag
 static datetime_t now;              // Current date and time
 static unsigned char date_looksie = 0;     // Flag is set when divde button is down
 
@@ -437,17 +437,24 @@ clock_draw_time (time_t *draw_time)
         else if (0x12 < draw_time->hour)
         {
             // PM
-            if ((draw_time->hour >> 4) - 1 || edit_position)
+
+            // Convert hour to 24-hour numerical format.
+            unsigned char hour_num = BCD2DEC(draw_time->hour);
+
+            // Convert hour back to 12-hour bcd format.
+            hour_num = (unsigned char)DEC2BCD(hour_num - 12);
+
+            if ((hour_num >> 4) || edit_position)
             {
                 // Only display digits > 0 OR if we are editing a position
-                display_primary_character(1, ((draw_time->hour >> 4) - 1));
+                display_primary_character(1, (hour_num >> 4));
             }
             else
             {
                 // Clear digit instead of displaying 0
                 display_primary_clear(1);
             }
-            display_primary_character(2, ((draw_time->hour & 0x0F) - 2));
+            display_primary_character(2, (hour_num & 0x0F));
             display_misc(DISPLAY_MISC_PM);
             display_misc_clear(DISPLAY_MISC_AM);
         }

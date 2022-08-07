@@ -59,13 +59,15 @@ backlight_set (signed char state)
         case BACKLIGHT_TOGGLE:
             if (backlight_state)
             {
-                // Backlight is currently on
+                // Backlight is currently on, turn off
                 pin_set_low(BACKLIGHT_LAT, BACKLIGHT_PIN);
+                backlight_state = 0;
             }
             else
             {
-                // Backlight is currently off
+                // Backlight is currently off, turn on
                 pin_set_high(BACKLIGHT_LAT, BACKLIGHT_PIN);
+                backlight_state = 1;
             }
         break;
     }

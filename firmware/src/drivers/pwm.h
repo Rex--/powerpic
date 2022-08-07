@@ -23,7 +23,7 @@ pwm_duty_set (unsigned char duty_cycle);
 /**
  * Gets the current duty cycle of the pwm output.
 */
-unsigned int
+unsigned char
 pwm_duty_get (void);
 
 

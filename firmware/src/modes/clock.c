@@ -23,6 +23,7 @@ signed char clock_edit  (unsigned int event);
 // Draw functions
 void clock_draw_time (time_t *draw_time);
 void clock_draw_date (date_t *draw_date);
+void clock_draw_weekday (unsigned char weekday);
 
 // Edit helper functions
 static void clock_draw_edit (void);
@@ -56,7 +57,7 @@ clock_start (void)
     clock_draw_time(&now.time);
 
     // Draw day of week
-    display_secondary_string(1, datetime_weekday_str(now.date.weekday));
+    clock_draw_weekday(now.date.weekday);
 
     // Set tickrate to 1 second
     tick_rate_set_sec(1);
@@ -74,6 +75,9 @@ clock_run (unsigned int event)
         if (0 == (now.time.minute | now.time.second))
         {
             datetime_today(&now.date);
+
+            // Also update the weekday display
+            clock_draw_weekday(now.date.weekday);
         }
 
         // If the divide key is down, we draw the date
@@ -228,6 +232,7 @@ clock_edit (unsigned int event)
             if (edit_position == POS_WEEKDAY)
             {
                 // When we are editing the weekday, flash the numerical value
+                display_secondary_clear(0);
                 display_secondary_character(1, (edit_now.date.weekday >> 4));
                 display_secondary_character(2, (edit_now.date.weekday & 0x0F));
             }
@@ -516,7 +521,64 @@ clock_draw_date (date_t *draw_date)
     display_primary_character(8, (draw_date->day & 0x0F));
 
     // Draw weekday
-    display_secondary_string(1, datetime_weekday_str(draw_date->weekday));
+    clock_draw_weekday(draw_date->weekday);
+}
+
+/**
+ * Draw the given day of the week to the display.
+ * 
+ * This draws a two character string to the secondary display
+ * representing the DOW.
+*/
+void
+clock_draw_weekday (unsigned char weekday)
+{
+    // Clear secondary display
+    display_secondary_clear(0);
+
+    switch (weekday)
+    {
+    case 0:
+        // Sunday
+        display_secondary_string(1, "SU");
+    break;
+
+    case 1:
+        // Monday
+        display_secondary_segments(1, 0b1010110111);
+        display_secondary_character(2, 'O');
+    break;
+
+    case 2:
+        // Tuesday
+        display_secondary_segments(1, 0b0010110001);
+        display_secondary_character(2, 'U');
+    break;
+
+    case 3:
+        // Wednesday
+        display_secondary_segments(1, 0b1100111110);
+        display_secondary_character(2, 'E');
+    break;
+
+    case 4:
+        // Thursday
+        display_secondary_segments(1, 0b0010110001);
+        display_secondary_character(2, 'H');
+    break;
+
+    case 5:
+        // Friday
+        display_secondary_string(1, "Fr");
+        // display_secondary_character(1, 'F');
+        // display_secondary_segments(2, 0b0011110111);
+    break;
+
+    case 6:
+        // Saturday
+        display_secondary_string(1, "SA");
+    break;
+    }
 }
 
 

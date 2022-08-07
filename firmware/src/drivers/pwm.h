@@ -36,7 +36,7 @@ pwm_freq_set (unsigned int freq);
 /**
  * Get the current frequency of the pwm output.
 */
-unsigned char
+unsigned int
 pwm_freq_get (void);
 
 /**

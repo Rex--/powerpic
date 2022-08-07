@@ -102,6 +102,8 @@ pwm_freq_set (unsigned int freq)
             LOG_DEBUG("Timer2 period: %i", timer_period);
             LOG_DEBUG("Timer2 prescaler: %i", timer_prescale);
 
+            pwm_frequency = freq;
+
             pwm_timer_period = (unsigned char)timer_period;
             T2PR = pwm_timer_period; // TODO: Don't actually set the period registers until we enable.
             pwm_timer_prescaler = timer_prescale;
@@ -116,6 +118,13 @@ pwm_freq_set (unsigned int freq)
     // Set some defaults?
 }
 
+unsigned int
+pwm_freq_get (void)
+{
+    return pwm_frequency;
+}
+
+
 void
 pwm_duty_set (unsigned char duty)
 {
@@ -125,6 +134,12 @@ pwm_duty_set (unsigned char duty)
     LOG_DEBUG("Duty cycle: [%i%%]%i", duty, pwm_duty_cycle);
 
     PWM4DC = (pwm_duty_cycle << 6);
+}
+
+unsigned char
+pwm_duty_get (void)
+{
+    return pwm_duty_ratio;
 }
 
 

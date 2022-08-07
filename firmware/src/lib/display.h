@@ -49,12 +49,14 @@ void    display_update  (void);
 
 void    display_set_font                (unsigned char font);
 
+void    display_primary_segments        (signed char position, unsigned char segments);
 void    display_primary_character       (signed char position, unsigned char character);
 void    display_primary_string          (signed char position, const char *string);
 void    display_primary_number          (signed char position, long number);
 void    display_primary_hex             (signed char position, long number);
 void    display_primary_clear           (signed char position);
 
+void    display_secondary_segments        (signed char position, unsigned int segments);
 void    display_secondary_character     (signed char position, unsigned char character);
 void    display_secondary_string        (signed char position, const char *string);
 void    display_secondary_number        (signed char position, int number);

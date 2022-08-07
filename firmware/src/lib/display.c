@@ -112,6 +112,16 @@ segments_draw (lcd_func_t draw_func, lcd_func_t clear_func, unsigned char positi
 
 
 void
+display_primary_segments (signed char position, unsigned char segments)
+{
+    position = position_normalize(position, LCD_PRIMARY_CHARACTERS);
+
+    segments_draw(&lcd_primary_draw, &lcd_primary_clear, (unsigned char)position, segments);
+
+    display_needs_update = 1;
+}
+
+void
 display_primary_character (signed char position, unsigned char character)
 {
     position = position_normalize(position, LCD_PRIMARY_CHARACTERS);
@@ -266,6 +276,27 @@ display_primary_clear (signed char position)
     display_needs_update = 1;
 }
 
+
+void
+display_secondary_segments (signed char position, unsigned int segments)
+{
+    position = position_normalize(position, LCD_SECONDARY_CHARACTERS);
+
+    // Draw 10 secondary segments
+    for (char bit = 0; bit < LCD_SECONDARY_CHARACTER_SEGMENTS; bit++)
+    {
+        if ((1U << bit) & segments)
+        {
+            lcd_secondary_draw((unsigned char)position, bit);
+        }
+        else
+        {
+            lcd_secondary_clear((unsigned char)position, bit);
+        }
+    }
+
+    display_needs_update = 1;
+}
 
 void
 display_secondary_character (signed char position, unsigned char character)

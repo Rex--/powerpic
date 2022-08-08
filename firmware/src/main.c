@@ -8,6 +8,8 @@
 
 #include <xc.h>
 
+#include "post.h"
+
 #include "lib/system.h"
 #include "lib/isr.h"
 #include "lib/mode.h"
@@ -69,6 +71,8 @@ void
 main (void)
 {
     setup();
+
+    post_bios();
 
     // Set a default datetime.
     // (Eventually we should load this from EEPROM or something)

@@ -59,8 +59,9 @@ make fclean     # Remove all created files and folders.
 
 
 ## Flash
-    The pins needed for ICSP are broken out so any PIC programmer that 
-    implements the right protocol can flash the built hex file to the watch.
+> The pins needed for ICSP are broken out so any PIC programmer that 
+> implements the right protocol can flash the built hex file to the watch.
+
 Python utility `picchick` is used by the Makefile to flash the firmware. It
 requires a compatible programmer connected to one of the computer's (virtual)
 serial ports. Three connections (not including ground) are required between the

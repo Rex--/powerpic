@@ -310,6 +310,12 @@ display_secondary_character (signed char position, unsigned char character)
     if (position)
     {
         segments_draw(&lcd_secondary_draw, &lcd_secondary_clear, (unsigned char)position, segments);
+
+        // We currently don't use the extra segments so clear them in case they
+        // are already set.
+        lcd_secondary_clear((unsigned char)position, 7);
+        lcd_secondary_clear((unsigned char)position, 8);
+        lcd_secondary_clear((unsigned char)position, 9);
     }
     else
     {
@@ -317,6 +323,12 @@ display_secondary_character (signed char position, unsigned char character)
         for (position = 1; position <= LCD_SECONDARY_CHARACTERS; position++)
         {
             segments_draw(&lcd_secondary_draw, &lcd_secondary_clear, (unsigned char)position, segments);
+
+            // We currently don't use the extra segments so clear them in case they
+            // are already set.
+            lcd_secondary_clear((unsigned char)position, 7);
+            lcd_secondary_clear((unsigned char)position, 8);
+            lcd_secondary_clear((unsigned char)position, 9);
         }
     }
     display_needs_update = 1;

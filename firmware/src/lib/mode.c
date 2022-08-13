@@ -39,10 +39,13 @@ mode_init (void)
     //
     for (int i = 0; i < MODE_MAX_MODES; i++)
     {
-        LOG_DEBUG("Initializing mode: %s", mode_list[i]->id);
+        if (mode_list[i]->init != NULL)
+        {
+            LOG_DEBUG("Initializing mode: %s", mode_list[i]->id);
 
-        // Call the mode's init function.
-        mode_list[i]->init();
+            // Call the mode's init function.
+            mode_list[i]->init();
+        }
     }
 
     // Reset libs n' things to a default state
@@ -75,13 +78,19 @@ mode_next (void)
     );
 
     // Stop the mode that is currently selected.
-    mode_list[mode_selected]->stop();
+    if (mode_list[mode_selected]->stop != NULL)
+    {
+        mode_list[mode_selected]->stop();
+    }
 
     // Reset libs n' things to a default state
     mode_config_defaults();
 
     // Start the next mode.
-    mode_list[mode_selected_next]->start();
+    if (mode_list[mode_selected_next]->start != NULL)
+    {
+        mode_list[mode_selected_next]->start();
+    }
 
     // Set new selected mode.
     mode_selected = mode_selected_next;

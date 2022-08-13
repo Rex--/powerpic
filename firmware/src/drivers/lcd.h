@@ -48,7 +48,7 @@ void        lcd_update          (void);
 /**
  * Draws a segment to the primary display.
  * This function does not directly interact with the LCDDATA registers. To
- * actually draw the segement on the screen, lcd_update() must be called at any
+ * actually draw the segment on the screen, lcd_update() must be called at any
  * point after this.
  * 
  * @param[in] position  The position of the character on screen.
@@ -66,7 +66,7 @@ void        lcd_primary_clear   (unsigned char position, unsigned char segment);
 /**
  * Draws a segment to the secondary display.
  * This function does not directly interact with the LCDDATA registers. To
- * actually draw the segement on the screen, lcd_update() must be called at any
+ * actually draw the segment on the screen, lcd_update() must be called at any
  * point after this.
  * 
  * @param[in] position  The position of the character on screen.
@@ -84,7 +84,7 @@ void        lcd_secondary_clear (unsigned char position, unsigned char segment);
 /**
  * Draw period segment.
  * This function does not directly interact with the LCDDATA registers. To
- * actually draw the segement on the screen, lcd_update() must be called at any
+ * actually draw the segment on the screen, lcd_update() must be called at any
  * point after this.
  * 
  * @param[in] segment   The segment to draw.
@@ -100,7 +100,7 @@ void        lcd_period_clear    (unsigned char segment);
 /**
  * Draw a sign segment.
  * This function does not directly interact with the LCDDATA registers. To
- * actually draw the segement on the screen, lcd_update() must be called at any
+ * actually draw the segment on the screen, lcd_update() must be called at any
  * point after this.
  * 
  * @param[in] segment   The segment to draw.
@@ -116,7 +116,7 @@ void        lcd_sign_clear      (unsigned char segment);
 /**
  * Draw a misc segment.
  * This function does not directly interact with the LCDDATA registers. To
- * actually draw the segement on the screen, lcd_update() must be called at any
+ * actually draw the segment on the screen, lcd_update() must be called at any
  * point after this.
  * 
  * @param[in] segment   The segment to draw.
@@ -130,18 +130,18 @@ void        lcd_misc_draw       (unsigned char segment);
 void        lcd_misc_clear      (unsigned char segment);
 
 /**
- * Clears all segements.
- * This clears ALL segements on COM0-3, including unused segements. This is
+ * Clears all segments.
+ * This clears ALL segments on COM0-3, including unused segments. This is
  * handy for initialization, but another procedure should probably be used in
  * the main application.
  * 
- * Currently this function is called on by the initilization function so the
+ * Currently this function is called on by the initialization function so the
  * LCD is blank upon enabling prior to the first update.
 */
 void        lcd_segments_clear (void);
 /**
- * Sets all segements.
- * This sets ALL segements on COM0-3, including unused segements. This function
+ * Sets all segments.
+ * This sets ALL segments on COM0-3, including unused segments. This function
  * is really only useful for debug purposes.
 */
 void        lcd_segments_set (void);

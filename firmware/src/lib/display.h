@@ -3,11 +3,11 @@
  * Display library for PowerOS
  * 
  * This library uses the LCD module in the PIC16LF1919x to drive the casio
- * watch display. It maps ascii characters onto the 7 segement displays based
+ * watch display. It maps ascii characters onto the 7 segment displays based
  * on a customizable font.
  * 
  * The display is split into 5 main groups to hopefully make things easier:
- *  1. Primary      The primary display includes the main 8 7-segement displays.
+ *  1. Primary      The primary display includes the main 8 7-segment displays.
  *                  This allows a max string length of 8.
  * 
  *  2. Secondary    The secondary display includes 2 7-segment displays that
@@ -20,11 +20,6 @@
  * 
  *  5. Misc         The misc group includes the AM/PM indicators, the
  *                  constant(K) indicator, and both alarm indicators.
- * 
- * TODO:
- * This library implements an additional display buffer on top of the LCD
- * driver's segment buffer. This buffer holds the display data as characters
- * instead of segment data. This allows easy printing of the display contents.
 */
 #ifndef DISPLAY_H
 #define DISPLAY_H
@@ -56,7 +51,7 @@ void    display_primary_number          (signed char position, long number);
 void    display_primary_hex             (signed char position, long number);
 void    display_primary_clear           (signed char position);
 
-void    display_secondary_segments        (signed char position, unsigned int segments);
+void    display_secondary_segments      (signed char position, unsigned int segments);
 void    display_secondary_character     (signed char position, unsigned char character);
 void    display_secondary_string        (signed char position, const char *string);
 void    display_secondary_number        (signed char position, int number);
@@ -77,4 +72,4 @@ void display_segments_zero (void);
 
 #endif
 
-/*** EOF ***/
+// EOF //

@@ -1,6 +1,6 @@
-/** @file display_fonts.h
+/** @file fonts.h
  * 
- * This file contains the font for use on the 7-segment display.
+ * This file contains the fonts for use on the 7-segment display.
  * 
  * Each font character is represented as a byte with each bit representing a
  * segment. The font range spans a limited range of the ascii character set from
@@ -16,6 +16,13 @@
 
 #ifndef DISPLAY_FONTS_H
 #define DISPLAY_FONTS_H
+
+/**
+ * Offset of ascii character values to our font array index.
+ * The characters are in the same order as ascii, starting with 32 (0x40) or
+ * a space (" ").
+*/
+#define DISPLAY_CHARACTER_ASCII_OFFSET  32
 
 /** The size of the font array. */
 #define FONT_SIZE   95
@@ -37,7 +44,7 @@ enum display_segments {
     G=0x40,     // Center   Center
     P=0x80,     // Period   (Not implemented)
 
-    H=0x100,    // Extra segments for the seconday display. (Not implemented)
+    H=0x100,    // Extra segments for the secondary display. (Not implemented)
     I=0x200,
     J=0x400
 };
@@ -77,7 +84,7 @@ const unsigned char default_font[FONT_SIZE] = {
     A|B|C|D|E|F|G,      // 8
     A|B|C|D|F|G,        // 9
 
-    // Puncuation
+    // Punctuation
     0x0,                // : ???
     0x0,                // ; ???
     D|E|G,              // < Like c
@@ -114,7 +121,7 @@ const unsigned char default_font[FONT_SIZE] = {
     B|C|F|G,            // Y
     A|B|D|E|G,          // Z
 
-    // Puncuation
+    // Punctuation
     A|D|E|F,            // [ Like C
     C|F|G,              // \ backslash
     A|B|C|D,            // ] Like a backwards C
@@ -157,12 +164,13 @@ const unsigned char default_font[FONT_SIZE] = {
     A,                  // ~ Top segment
 };
 
-
 /**
  * Available display fonts.
 */
 const unsigned char * display_fonts[] = {
-    &default_font[0],
+    default_font,
 };
 
 #endif
+
+// EOF //

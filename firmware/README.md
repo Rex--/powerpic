@@ -10,7 +10,7 @@ The following programs are required to build and flash the firmware:
 - `make`
 - `xc8` - Microchip's C compiler for PICx Devices. I use the AUR package
     _microchip-xc8-bin_ which installs version 2.36 of the compiler.
-  - NOTE: Firmware has not been tested with v2.40
+  - NOTE: Firmware has been successfully compiled and tested with the latest v2.40.
 - `picchick` - Flash PICs using an AVR device. Get it 
 [from the repo](https://github.com/rex--/picchick).
 

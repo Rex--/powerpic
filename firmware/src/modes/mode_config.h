@@ -16,22 +16,41 @@
 #define _mode_config_h_
 
 #include "lib/mode.h"       // We need the mode typedefs
-#include "modes/test.h"
-#include "modes/alarmclock.h"
+// #include "modes/test.h"
 #include "modes/clock.h"
+#include "modes/alarmclock.h"
+#include "modes/power.h"
 
 
 enum mode_app_index {
+#ifdef _test_h_
     MODE_TEST,
-    // MODE_CLOCK,
-    // MODE_ALARMCLOCK,
+#endif
+#ifdef _clock_h_
+    MODE_CLOCK,
+#endif
+#ifdef _alarmclock_h_
+    MODE_ALARMCLOCK,
+#endif
+#ifdef _power_h_
+    MODE_POWER,
+#endif
     MODE_MAX_MODES,
 };
 
-static mode_app_t *mode_list[MODE_MAX_MODES] = {
+mode_app_t *mode_list[MODE_MAX_MODES] = {
+#ifdef _test_h_
     &test_mode,
-    // &clock_mode,
-    // &alarmclock_mode,
+#endif
+#ifdef _clock_h_
+    &clock_mode,
+#endif
+#ifdef _alarmclock_h_
+    &alarmclock_mode,
+#endif
+#ifdef _power_h_
+    &power_mode,
+#endif
 };
 
 #endif

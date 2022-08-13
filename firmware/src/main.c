@@ -22,6 +22,7 @@
 #include "lib/backlight.h"
 #include "lib/buzzer.h"
 #include "lib/display.h"
+#include "lib/battery.h"
 
 #define LOG_TAG "main"
 #include "lib/logging.h"
@@ -40,10 +41,10 @@ setup (void)
     //
     system_init();
 
-    // Init logging lib so it is availble for use by libs.
+    // Init logging lib so it is available for use by libs.
     logging_init();
 
-    // Initialize peripherial libraries:
+    // Initialize peripheral libraries:
     // - Timers     (tick.h)
     // - RTCC       (datetime.h)
     //   - Alarm    (alarm.h)
@@ -52,6 +53,7 @@ setup (void)
     // - Buttons    (buttons.h)
     // - Buzzer     (buzzer.h)
     // - Backlight  (backlight.h)
+    // - ADC        (battery.h)
     //
     tick_init();
     datetime_init();
@@ -61,6 +63,7 @@ setup (void)
     buttons_init();
     buzzer_init();
     backlight_init();
+    battery_init();
 }
 
 /**
@@ -82,7 +85,7 @@ main (void)
     };
     datetime_set(&fourtwenty);
 
-    // Initilize our modes. This calls each mode's init() function. It then
+    // Initialize our modes. This calls each mode's init() function. It then
     // starts the default mode (whatever is at mode_list index 0) and configures
     // the system according to the mode's config.
     mode_init();

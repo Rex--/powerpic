@@ -37,15 +37,16 @@ void
 power_start (void)
 {
     // Draw something immediately.
-    display_primary_string(1, "bat v---");
+    display_secondary_string(1, "bA");
+    display_primary_string(1, "bat ---V");
     display_update();
 
     // Get inital battery reading
     battery_voltage = battery_read_voltage();
 
     // Draw it to the display
-    display_primary_number(8, lroundf(battery_voltage*100));
-    display_period(6);
+    display_primary_number(7, lroundf(battery_voltage*100));
+    display_period(5);
 
     LOG_INFO("Battery: %0.2f", battery_voltage);
 
@@ -64,7 +65,7 @@ switch (EVENT_TYPE(event))
         // the previous value.
         battery_voltage += battery_read_voltage();
         battery_voltage /= 2;
-        display_primary_number(8, lroundf(battery_voltage*100));
+        display_primary_number(7, lroundf(battery_voltage*100));
 
         LOG_INFO("Battery: %0.2f", battery_voltage);
     break;
@@ -80,6 +81,7 @@ switch (EVENT_TYPE(event))
 
             // Get initial voltage with the backlight on.
             battery_voltage = battery_read_voltage();
+            display_primary_number(7, lroundf(battery_voltage*100));
         }
         else if (EVENT_DATA(event) == '+')
         {
@@ -104,6 +106,7 @@ switch (EVENT_TYPE(event))
             // Get battery voltage without backlight on, the next update will
             // be in 2 minutes.
             battery_voltage = battery_read_voltage();
+            display_primary_number(7, lroundf(battery_voltage*100));
         }
         else if (EVENT_DATA(event) == '+')
         {
@@ -122,7 +125,7 @@ switch (EVENT_TYPE(event))
         {
             // Adj button resets the rolling average.
             battery_voltage = battery_read_voltage();
-            display_primary_number(8, lroundf(battery_voltage*100));
+            display_primary_number(7, lroundf(battery_voltage*100));
         }
     break;
     
@@ -136,7 +139,7 @@ switch (EVENT_TYPE(event))
 void
 power_stop (void)
 {
-    display_period_clear(6);
+    display_period_clear(5);
 }
 
 // EOF //

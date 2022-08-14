@@ -152,6 +152,9 @@ clock_stop (void)
     // Clear AM/PM for next mode
     display_misc_clear(DISPLAY_MISC_AM);
     display_misc_clear(DISPLAY_MISC_PM);
+
+    // Clear colon for next mode
+    display_period_clear(DISPLAY_PERIOD_COLON);
 }
 
 

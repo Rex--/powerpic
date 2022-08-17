@@ -20,6 +20,7 @@
 #include "modes/clock.h"
 #include "modes/alarmclock.h"
 #include "modes/power.h"
+#include "modes/settings.h"
 
 
 enum mode_app_index {
@@ -34,6 +35,9 @@ enum mode_app_index {
 #endif
 #ifdef _power_h_
     MODE_POWER,
+#endif
+#ifdef _settings_h_
+    MODE_SETTINGS,
 #endif
     MODE_MAX_MODES,
 };
@@ -50,6 +54,9 @@ mode_app_t *mode_list[MODE_MAX_MODES] = {
 #endif
 #ifdef _power_h_
     &power_mode,
+#endif
+#ifdef _settings_h_
+    &settings_mode,
 #endif
 };
 

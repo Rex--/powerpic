@@ -3,7 +3,7 @@
  * Fixed Voltage Reference Driver Library for PIC16LF1919x Devices.
  * 
  * The FVR driver must be initialized before use of the FVR for other
- * peripherials. After initialization, each peripherial is expected to
+ * peripherals. After initialization, each peripheral is expected to
  * configure their respective `FVRCONbits`.
 */
 

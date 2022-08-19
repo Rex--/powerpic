@@ -292,7 +292,7 @@
       (stroke (width 0.15) (type solid)) (layer "Eco1.User") (tstamp aa7d5ef9-901b-431e-9733-8cd196f87844))
     (fp_arc (start 1.590454 -10.408678) (mid 3.090454 -8.908678) (end 1.590454 -7.408678)
       (stroke (width 0.15) (type solid)) (layer "Eco1.User") (tstamp e37d9990-c761-48a2-b278-8535617187ce))
-    (fp_arc (start 2.490454 -0.908678) (mid 1.35908 -1.377306) (end 0.890454 -2.508678)
+    (fp_arc (start 2.490454 -0.908678) (mid 1.359083 -1.377306) (end 0.890454 -2.508678)
       (stroke (width 0.15) (type solid)) (layer "Eco1.User") (tstamp fe901678-e385-4d99-a0d1-0f686a3836dd))
     (fp_circle (center 1.590454 -8.908678) (end 1.140454 -8.908678)
       (stroke (width 0.15) (type solid)) (fill none) (layer "Eco1.User") (tstamp 604240d6-28a1-4bd8-9808-019e73663f43))
@@ -1355,25 +1355,11 @@
   (gr_text "TODO" (at 168.58 43.84) (layer "User.1") (tstamp 8074c077-e8ab-4830-b73f-484e4cdb3751)
     (effects (font (size 2 2) (thickness 0.5) bold) (justify left bottom))
   )
-  (gr_text_box "- Align GND pad better\n- Move ICSP left a bit, maybe a bit up\n- Move debug pad up + left"
+  (gr_text_box "- Align GND pad better\n- Move ICSP left a bit, maybe a bit up\n- Move debug pad up + left\n- Extra GND testpoint on back needs to be moved up + left if kept"
     (start 154.33 44.44) (end 193.75 69.98) (layer "User.1") (tstamp 3d0350df-f919-41ad-9acd-434409dd4bc6)
       (effects (font (size 1 1) (thickness 0.15)) (justify left top))
     (stroke (width 0.15) (type solid))  )
 
-  (zone (net 0) (net_name "") (layer "F.Cu") (tstamp 67907f25-53ef-4ab6-b267-e21f0e49e95c) (hatch edge 0.508)
-    (connect_pads (clearance 0))
-    (min_thickness 0.254) (filled_areas_thickness no)
-    (keepout (tracks allowed) (vias allowed) (pads allowed) (copperpour not_allowed) (footprints allowed))
-    (fill (thermal_gap 0.508) (thermal_bridge_width 0.508) (island_removal_mode 2) (island_area_min 10))
-    (polygon
-      (pts
-        (xy 137.2 68.25)
-        (xy 125.21 68.25)
-        (xy 125.21 66.2)
-        (xy 137.2 66.2)
-      )
-    )
-  )
   (zone (net 0) (net_name "") (layer "F.Cu") (tstamp c7575dc0-3b76-454d-b509-0bc2e6ade8c8) (hatch edge 0.508)
     (connect_pads (clearance 0))
     (min_thickness 0.254) (filled_areas_thickness no)

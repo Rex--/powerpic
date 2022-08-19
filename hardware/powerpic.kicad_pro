@@ -561,9 +561,7 @@
   },
   "libraries": {
     "pinned_footprint_libs": [],
-    "pinned_symbol_libs": [
-      "powerpic"
-    ]
+    "pinned_symbol_libs": []
   },
   "meta": {
     "filename": "powerpic.kicad_pro",

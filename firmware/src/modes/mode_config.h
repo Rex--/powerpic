@@ -39,6 +39,7 @@ enum mode_app_index {
 #endif
 #ifdef _settings_h_
     MODE_SETTINGS,
+#endif
 #ifdef _thermometer_h_
     MODE_THERMOMETER,
 #endif
@@ -60,6 +61,7 @@ mode_app_t *mode_list[MODE_MAX_MODES] = {
 #endif
 #ifdef _settings_h_
     &settings_mode,
+#endif
 #ifdef _thermometer_h_
     &thermometer_mode,
 #endif

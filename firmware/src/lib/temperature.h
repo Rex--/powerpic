@@ -11,7 +11,14 @@
 #ifndef _temperature_h_
 #define _temperature_h_
 
-float
+/**
+ * Read the current cpu temperature.
+ * 
+ * This function returns a fairly inaccurate measurement.
+ * 
+ * @returns Temperature in degrees Celsius.
+*/
+int
 temperature_read (void);
 
 #endif

@@ -12,11 +12,11 @@
 #define LOG_TAG "lib.temperature"
 #include "lib/logging.h"
 
-#include "lib/battery.h"
+#include "lib/temperature.h"
 
 static void temperature_adc_config (void);
 
-float
+int
 temperature_read (void)
 {
     // Configure ADC for temp sensor use.
@@ -30,9 +30,9 @@ temperature_read (void)
     }
     unsigned int average = (unsigned int)adc_result();
 
-    // 100 Samples
+    // 10 Samples
     //
-    for (int res = 0; res < 100; res++)
+    for (int res = 0; res < 10; res++)
     {
         adc_sample();
         
@@ -43,14 +43,24 @@ temperature_read (void)
 
         average = (average + (unsigned int)adc_result()) / 2;
     }
+    LOG_DEBUG("Raw: %u", average);
 
-    LOG_INFO("Result: %u", average);
+    // Calculate temperature based on a calibration reading at 25C. This gives
+    // a good range for the middle of the temperature range.
+    // This is not very accurate.
+    // NOTE: This formula was borrowed from Microchip Forum user mbrowning.(1)
+    //     Thanks for your help.
+    // (1) https://www.microchip.com/forums/m1214187.aspx
+    //
+    long tmp32s = 25 + ((long)(average - 2775L) * 2048L / -15565L);
+    int temp_c_25c = (int)tmp32s;
+    LOG_DEBUG("Cal@25: %i", temp_c_25c);
 
     adc_disable();
     fvr_temp_set(FVR_TEMP_OFF);
     fvr_disable();
 
-    return 0.0;
+    return temp_c_25c;
 }
 
 static void

@@ -13,6 +13,9 @@
 #include "lib/keypad.h"
 #include "lib/datetime.h"
 
+#include "lib/settings.h"
+#include "modes/mode_settings.h"
+
 #include "modes/clock.h"
 
 
@@ -41,6 +44,20 @@ static unsigned char date_looksie = 0;     // Flag is set when divde button is d
 void
 clock_init (void)
 {
+    // Load clock_fmt from settings
+    clock_fmt = settings_get(SETTING_CLOCK_FMT);
+
+    // Verify value is in range 0-1
+    if (1 < clock_fmt)
+    {
+        // We default to 24-hour time with unknown values.
+        clock_fmt = 0;
+
+        // And reset setting value to 0
+        settings_set(SETTING_CLOCK_FMT, 0);
+    }
+
+    // Default state
     date_looksie = 0;
 }
 
@@ -376,14 +393,20 @@ clock_edit (unsigned int event)
         {
             // Press of the adj button saves the time and returns to the clock.
 
+            // Set new time with current seconds
+            edit_now.time.second = SECONDS;
+            datetime_set(&edit_now);
+
             // Set to 0 to signify we aren't editing any position.
             // We use this in the clock_draw_time function to determine whether
             // to draw a 0 in the tens place if the hour is < 10 AND we are in 12HR mode
             edit_position = 0;
 
-            // Set new time with current seconds
-            edit_now.time.second = SECONDS;
-            datetime_set(&edit_now);
+            // Save clock_fmt to EEPROM if its changed.
+            if (settings_get(SETTING_CLOCK_FMT) != clock_fmt)
+            {
+                settings_set(SETTING_CLOCK_FMT, clock_fmt);
+            }
 
             // Set main run thread function
             clock_mode.run = &clock_run;

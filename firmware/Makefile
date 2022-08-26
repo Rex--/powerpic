@@ -10,6 +10,9 @@ LOG_LVL := 0
 ## Frequency of the clock in Hz
 XTAL_FREQ := 4000000
 
+## Bootloader offset in hex
+BOOT_OFFSET := 0x400
+
 
 ################################################################################
 #    Programmer options    #
@@ -56,7 +59,7 @@ FWFLAGS = -D_XTAL_FREQ=${XTAL_FREQ} -DPCB_REV=${PCB_REV} -DLOG_LVL=$(LOG_LVL)
 CFLAGS := -O2 -c
 
 ## Options for xc8 compiler linker
-LFLAGS := -O2
+LFLAGS := -O2 -mcodeoffset=${BOOT_OFFSET}
 
 
 ################################################################################
@@ -134,14 +137,17 @@ fclean:
 ###########################
 #    Flashing Commands    #
 
-## Flashes the built hexfile onto a device using picchick
-flash: fw
-	@echo "Flashing..."
+## Alias
+flash: upload
+
+## Uploads the built hexfile onto a device with flipflop using picchick
+upload: fw
+	@echo "Uploading firmware..."
 	picchick \
+		-c flipflop \
 		-d $(MCU) \
 		-P $(PROGRAMMER_PORT) \
 		-B $(PROGRAMMER_BAUD) \
-		--erase \
 		--flash \
 		$(BUILD_DIR)/$(TARGET).hex
 
@@ -150,11 +156,10 @@ flash: fw
 #    Help Commands    #
 
 help:
-	@echo "'make'        - Build firmware with settings defined in Makefile."
-	@echo "'make prod'   - Build firmware with production settings."
-	@echo "'make dev'    - Build firmware with development settings."
 	@echo " "
-	@echo "'make flash'  - Flash firmware using picchick, building if neccessary."
+	@echo "'make'        - Build firmware with settings defined in Makefile."
+	@echo " "
+	@echo "'make upload' - Upload firmware using picchick, building if neccessary."
 	@echo " "
 	@echo "'make clean'  - Remove built firmware files."
 	@echo "'make fclean' - Remove all files and folders created."
@@ -162,13 +167,4 @@ help:
 
 .DEFAULT:
 	@echo "Error: Unknown command"
-	@echo " "
-	@echo "'make'        - Build firmware with settings defined in Makefile."
-	@echo "'make prod'   - Build firmware with production settings."
-	@echo "'make dev'    - Build firmware with development settings."
-	@echo " "
-	@echo "'make flash'  - Flash firmware using picchick, building if neccessary."
-	@echo " "
-	@echo "'make clean'  - Remove built firmware files."
-	@echo "'make fclean' - Remove all files and folders created."
-	@echo " "
+	@make help

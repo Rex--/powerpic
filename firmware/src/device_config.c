@@ -4,7 +4,6 @@
 */
 
 
-
 // Configuration Word 1
 
 /** External Clock mode - External clock not enabled. */
@@ -77,7 +76,9 @@
 #pragma config WDTCCS = SOSC
 
 
-
+// The bootloader we use doesn't allow us to define configuration words 4 or 5.
+// It's okay, because we didn't use them anyways.
+#if 0
 // Configuration Word 4
 
 /** Boot Block Size Selection **/
@@ -113,6 +114,6 @@
 
 /** UserNVM Program Memory Code Protection **/
 #pragma config CP = OFF
-
+#endif
 
 // EOF //

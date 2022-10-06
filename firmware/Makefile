@@ -11,7 +11,7 @@ LOG_LVL := 0
 XTAL_FREQ := 4000000
 
 ## Bootloader offset in hex
-BOOT_OFFSET := 0x400
+# BOOT_OFFSET := 0x0
 
 
 ################################################################################
@@ -59,7 +59,7 @@ FWFLAGS = -D_XTAL_FREQ=${XTAL_FREQ} -DPCB_REV=${PCB_REV} -DLOG_LVL=$(LOG_LVL)
 CFLAGS := -O2 -c
 
 ## Options for xc8 compiler linker
-LFLAGS := -O2 -mcodeoffset=${BOOT_OFFSET}
+LFLAGS := -O2# -mcodeoffset=${BOOT_OFFSET}
 
 
 ################################################################################
@@ -137,8 +137,17 @@ fclean:
 ###########################
 #    Flashing Commands    #
 
-## Alias
-flash: upload
+## Flash the built hexfile onto a device with ICSP using picchick
+flash: fw
+	@echo "Flashing firmware..."
+	picchick \
+		-c picstick \
+		-d $(MCU) \
+		-P $(PROGRAMMER_PORT) \
+		-B $(PROGRAMMER_BAUD) \
+		--erase \
+		--flash \
+		$(BUILD_DIR)/$(TARGET).hex
 
 ## Uploads the built hexfile onto a device with flipflop using picchick
 upload: fw

@@ -43,16 +43,15 @@ display_secondary_character (signed char position, unsigned char character)
     if (position)
     {
         // We currently don't use the extra segments for displaying characters
-        // so we |or our character segments with int(0) to blank the additional
-        // characters.
-        display_secondary_segments(position, (segments | 0));
+        // so we cast our (char) character segments as ints.
+        display_secondary_segments(position, (unsigned int)segments);
     }
     else
     {
         // If position is zero we set all characters
         for (position = 1; position <= LCD_SECONDARY_CHARACTERS; position++)
         {
-            display_secondary_segments(position, (segments | 0));
+            display_secondary_segments(position, (unsigned int)segments);
         }
     }
 }
@@ -165,6 +164,67 @@ display_secondary_number (signed char position, int number)
         display_secondary_character(position, 0);
     }
 }
+
+
+/**
+ * Display a hexadecimal number.
+ * 
+ * @param[in]   position    Position of least significant digit.
+ * @param[in]   number      Number to display.
+*/
+void
+display_secondary_hex (signed char position, unsigned char number)
+{
+    if (0 == number)
+    {
+        // Special case for 0
+        display_secondary_character(position, 0);
+    }
+    else
+    {
+        position = position_normalize(position, LCD_SECONDARY_CHARACTERS);
+
+        // Draw each digit as an ascii character.
+        unsigned char number_char = 0;
+        while (0 < number && 0 < position)
+        {
+            number_char = number % 16;
+
+            if (number_char > 9)
+            {
+                switch (number_char)
+                {
+                    case 10:
+                        number_char = 'A';
+                    break;
+                    case 11:
+                        number_char = 'b';
+                    break;
+                    case 12:
+                        number_char = 'C';
+                    break;
+                    case 13:
+                        number_char = 'd';
+                    break;
+                    case 14:
+                        number_char = 'E';
+                    break;
+                    case 15:
+                        number_char = 'F';
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+
+            display_secondary_character(position--, number_char);
+
+            number /= 16;
+        }
+    }
+}
+
 
 void
 display_secondary_clear (signed char position)

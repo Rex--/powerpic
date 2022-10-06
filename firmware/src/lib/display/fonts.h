@@ -80,7 +80,7 @@ const unsigned char default_font[FONT_SIZE] = {
     B|C|F|G,            // 4
     A|C|D|F|G,          // 5
     A|C|D|E|F|G,        // 6
-    A|B|C,              // 7
+    A|B|C|F,            // 7
     A|B|C|D|E|F|G,      // 8
     A|B|C|D|F|G,        // 9
 
@@ -113,7 +113,7 @@ const unsigned char default_font[FONT_SIZE] = {
     A|B|C|D|E|F,        // Q Like O
     A|E|F,              // R ** Lowercase, but big
     A|C|D|F|G,          // S Like a 5
-    A|B|C,              // T Weird
+    A|E|F,              // T Upside down L
     B|C|D|E|F,          // U Like V
     B|C|D|E|F,          // V Like U
     B|D|F,              // W Kinda weird

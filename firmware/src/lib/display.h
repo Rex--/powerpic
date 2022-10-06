@@ -48,7 +48,7 @@ void    display_primary_segments        (signed char position, unsigned char seg
 void    display_primary_character       (signed char position, unsigned char character);
 void    display_primary_string          (signed char position, const char *string);
 void    display_primary_number          (signed char position, long number);
-void    display_primary_hex             (signed char position, long number);
+void    display_primary_hex             (signed char position, unsigned long number);
 void    display_primary_clear           (signed char position);
 
 void    display_secondary_segments      (signed char position, unsigned int segments);

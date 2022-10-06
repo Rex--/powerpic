@@ -196,6 +196,66 @@ display_primary_number (signed char position, long number)
     }
 }
 
+
+/**
+ * Display a hexadecimal number.
+ * 
+ * @param[in]   position    Position of least significant digit.
+ * @param[in]   number      Number to display.
+*/
+void
+display_primary_hex (signed char position, unsigned long number)
+{
+    if (0 == number)
+    {
+        // Special case for 0
+        display_primary_character(position, 0);
+    }
+    else
+    {
+        position = position_normalize(position, LCD_PRIMARY_CHARACTERS);
+
+        // Draw each digit as an ascii character.
+        unsigned char number_char = 0;
+        while (0 < number && 0 < position)
+        {
+            number_char = number % 16;
+
+            if (number_char > 9)
+            {
+                switch (number_char)
+                {
+                    case 10:
+                        number_char = 'A';
+                    break;
+                    case 11:
+                        number_char = 'b';
+                    break;
+                    case 12:
+                        number_char = 'C';
+                    break;
+                    case 13:
+                        number_char = 'd';
+                    break;
+                    case 14:
+                        number_char = 'E';
+                    break;
+                    case 15:
+                        number_char = 'F';
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+
+            display_primary_character(position--, number_char);
+
+            number /= 16;
+        }
+    }
+}
+
 void
 display_primary_clear (signed char position)
 {
@@ -213,7 +273,7 @@ display_primary_clear (signed char position)
         // }
     }
 
-    // 0 or less clears whole primary display.
+    // 0 clears whole primary display.
     else
     {
         for (position = 1; position <= LCD_PRIMARY_CHARACTERS; position++)

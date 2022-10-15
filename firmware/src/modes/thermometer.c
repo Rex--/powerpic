@@ -12,8 +12,6 @@
 #include "lib/display.h"
 #include "lib/buttons.h"
 #include "lib/keypad.h"
-// #include "lib/buzzer.h"
-// #include "lib/backlight.h"
 #include "lib/temperature.h"
 
 #include "lib/logging.h"
@@ -29,6 +27,10 @@ static int last_temp = 0;
 
 // Format of displayed temp. 0/1 for C/F
 static unsigned char temp_fmt = 0;
+
+// Calibrate temperature sensor
+static signed char thermometer_calibrate (unsigned int event);
+static void thermometer_calibrate_start (void);
 
 // Display last_temp in temp_fmt
 static void thermometer_display_temp (void);
@@ -85,6 +87,74 @@ thermometer_run (unsigned int event)
             // Return 1 to signal to switch modes
             return 1;
         }
+        if (EVENT_DATA(event) == BUTTON_ADJ_PRESS)
+        {
+            // Adj button calibrates the sensor
+            thermometer_calibrate_start();
+            thermometer_mode.run = &thermometer_calibrate;
+        }
+    break;
+    
+    default:
+    break;
+    }
+
+    return 0;
+}
+
+static int thermometer_input_degrees = 0;
+
+static void
+thermometer_calibrate_start (void)
+{
+    thermometer_input_degrees = 0;
+    display_primary_string(1, "CAL --");
+}
+
+static signed char
+thermometer_calibrate (unsigned int event)
+{
+    unsigned char keypress = 0;
+
+    switch (EVENT_TYPE(event))
+    {
+    case KEYPAD_EVENT_PRESS:
+        keypress = EVENT_DATA(event);
+        
+        if ((keypress >= '0') && (keypress <= '9'))
+        {
+            // Keypress is a number
+            thermometer_input_degrees = (thermometer_input_degrees * 10) + (keypress - 48);
+
+            // Display new value
+            display_primary_number(-3, thermometer_input_degrees);
+        }
+    break;
+
+    case EVENT_BUTTON:
+        if (EVENT_DATA(event) == BUTTON_MODE_PRESS)
+        {
+            // Mode button sets calibration value
+            display_primary_string(1, "  SET   ");
+            display_update();
+            if (temp_fmt)
+            {
+                thermometer_input_degrees = (int)lroundf((thermometer_input_degrees - 32) * 0.556F);
+            }
+            temperature_calibrate(thermometer_input_degrees);
+
+            // Set back to main run thread
+            thermometer_start();
+            thermometer_mode.run = &thermometer_run;
+        }
+        if (EVENT_DATA(event) == BUTTON_ADJ_PRESS)
+        {
+            // Adj button cancels
+            // Set back to main run thread
+            thermometer_start();
+            thermometer_mode.run = &thermometer_run;
+        }
+
     break;
     
     default:

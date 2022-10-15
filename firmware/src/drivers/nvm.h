@@ -10,6 +10,16 @@
 #define _nvm_h_
 
 /**
+ * Read a word from PFM.
+ * 
+ * @param[in]   address Address to read from.
+ * 
+ * @returns     Integer representing a 14-bit word of flash.
+*/
+unsigned int
+nvm_read (unsigned char nvmregs, unsigned int address);
+
+/**
  * Read a byte of data from EEPROM.
  * 
  * There are 256 bytes of EEPROM available for use. The addresses map to

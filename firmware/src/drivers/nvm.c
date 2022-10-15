@@ -10,6 +10,23 @@
 // NVM unlock sequence. This will set the WR bit and write any data.
 static void nvm_unlock (void);
 
+unsigned int
+nvm_read (unsigned char nvmregs, unsigned int address)
+{
+    // Clear bit to read PFM
+    NVMCON1bits.NVMREGS = nvmregs;
+
+    // Load address into NVMADR registers
+    NVMADRH = (address >> 8);
+    NVMADRL = (address & 0xFF);
+
+    // Set bit to initiate read
+    NVMCON1bits.RD = 1;
+
+    // Data is available the very next cycle.
+    return (unsigned int)((NVMDATH << 8) | NVMDATL);
+}
+
 unsigned char
 nvm_eeprom_read (unsigned char address)
 {

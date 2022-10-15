@@ -12,6 +12,7 @@
 #include "lib/buttons.h"
 #include "lib/keypad.h"
 #include "lib/datetime.h"
+#include "lib/backlight.h"
 
 #include "lib/settings.h"
 #include "modes/mode_settings.h"
@@ -128,6 +129,11 @@ clock_run (unsigned int event)
             // Flag that divide key is down
             date_looksie = 1;
         }
+
+        if (EVENT_DATA(event) == '+')
+        {
+            backlight_set(BACKLIGHT_ON);
+        }
     }
     else if (EVENT_TYPE(event) == KEYPAD_EVENT_RELEASE)
     {
@@ -138,6 +144,11 @@ clock_run (unsigned int event)
 
             // Divide key is up
             date_looksie = 0;
+        }
+
+        if (EVENT_DATA(event) == '+')
+        {
+            backlight_set(BACKLIGHT_OFF);
         }
     }
 

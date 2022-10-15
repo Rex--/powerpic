@@ -9,6 +9,7 @@
 #include "lib/tick.h"
 #include "lib/buttons.h"
 #include "lib/keypad.h"
+#include "lib/display.h"
 
 #include "modes/mode_config.h"
 
@@ -137,6 +138,12 @@ mode_config_defaults (void)
     
     // Default keypad keymap: Casio
     keypad_keymap_set(KEYMAP_CASIO);
+
+    // Default Display: Blank primary & secondary displays.
+    // The sign & misc displays are not touched so they can be 'notifications'.
+    // Each mode is expected to clean up their used punctuation.
+    display_primary_clear(0);
+    display_secondary_clear(0);
 }
 
 // EOF //

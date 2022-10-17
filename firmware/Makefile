@@ -11,7 +11,7 @@ LOG_LVL := 0
 XTAL_FREQ := 4000000
 
 ## Bootloader offset in hex
-# BOOT_OFFSET := 0x0
+BOOT_OFFSET := 0x400
 
 
 ################################################################################
@@ -59,7 +59,7 @@ FWFLAGS = -D_XTAL_FREQ=${XTAL_FREQ} -DPCB_REV=${PCB_REV} -DLOG_LVL=$(LOG_LVL)
 CFLAGS := -O2 -c
 
 ## Options for xc8 compiler linker
-LFLAGS := -O2# -mcodeoffset=${BOOT_OFFSET}
+LFLAGS := -O2 -mcodeoffset=${BOOT_OFFSET}
 
 
 ################################################################################
@@ -71,11 +71,14 @@ SOURCES := $(shell find $(SOURCE_DIR) -name '*.c')
 # Generate list of p-code object files from sources
 OBJECTS := $(SOURCES:%.c=$(BUILD_DIR)/%.p1)
 
+# Generate list of dependency files
+DEPENDS := $(SOURCES:%.c=$(BUILD_DIR)/%.d)
+
 ## Generate list of folders in build directory
 # BUILD_FILE_DIRS = $(shell find $(BUILD_DIR) -type d)
 
 # Generate p-code files
-$(BUILD_DIR)/%.p1: %.c
+$(BUILD_DIR)/%.p1: %.c Makefile
 	@mkdir -p $(dir $@)
 	@echo "Compiling $<"
 	@$(CC) $(TARGET_ARCH) $(CFLAGS) -I$(INCLUDE_DIR)/ ${FWFLAGS} $< -o $@
@@ -83,7 +86,7 @@ $(BUILD_DIR)/%.p1: %.c
 ## Generate bin files (.hex and .elf)
 # Note: This command builds everythings,
 # maybe we can find a way to split up the actions.
-$(BUILD_DIR)/$(TARGET).hex: $(OBJECTS)
+$(BUILD_DIR)/$(TARGET).hex: $(OBJECTS) Makefile
 	@mkdir -p $(dir $@)
 	@echo "Building hexfile..."
 	@$(CC) $(TARGET_ARCH) $(LFLAGS) $(OBJECTS) -o $@
@@ -177,3 +180,5 @@ help:
 .DEFAULT:
 	@echo "Error: Unknown command"
 	@make help
+
+-include $(DEPENDS)

@@ -6,8 +6,6 @@
 #include <xc.h>
 #include <math.h>   // for llroundf()
 
-#include "lib/logging.h"
-
 #include "drivers/pwm.h"
 
 
@@ -99,9 +97,6 @@ pwm_freq_set (unsigned int freq)
 
         if ((0 < timer_period) && (timer_period < 255))
         {
-            LOG_DEBUG("Timer2 period: %i", timer_period);
-            LOG_DEBUG("Timer2 prescaler: %i", timer_prescale);
-
             pwm_frequency = freq;
 
             pwm_timer_period = (unsigned char)timer_period;
@@ -111,8 +106,6 @@ pwm_freq_set (unsigned int freq)
             return;
         }
     }
-
-    LOG_ERROR("BAD PWM FREQ: %i", freq);
     // Error: bad frequency!
     // What can we do? Should this function return something?
     // Set some defaults?
@@ -131,7 +124,6 @@ pwm_duty_set (unsigned char duty)
     // TODO: Comments
     pwm_duty_ratio = duty;
     pwm_duty_cycle = (unsigned int)lroundf(((float)duty/100) * (4 * (pwm_timer_period + 1)));
-    LOG_DEBUG("Duty cycle: [%i%%]%i", duty, pwm_duty_cycle);
 
     PWM4DC = (pwm_duty_cycle << 6);
 }

@@ -72,8 +72,11 @@ test_run (unsigned int event)
         // Display a '-' when key is down
         display_secondary_character(2, '-');
 
-        // Also give a short beep
-        buzzer_tone(3500, 50, 15);
+        // Also play a song
+        // static char song[] = "DKCountry:d=4,o=5,b=125:32p,8c,8c,a.,p,8f,8g,8f,d.,p,8d,8d,a#.,p,8g,8a,8g,e.,p,8e,8e,c.6,p,8a,8a#,8c6,d.6,p,8f,8g,a,f,8p,8e,8f,8g,d.";
+        // static char song[] = "Jeopardy:d=4,o=6,b=125:c,f,c,f5,c,f,2c,c,f,c,f,a.,8g,8f,8e,8d,8c#,c,f,c,f5,c,f,2c,f.,8d,c,a#5,a5,g5,f5,p,d#,g#,d#,g#5,d#,g#,2d#,d#,g#,d#,g#,c.7,8a#,8g#,8g,8f,8e,d#,g#,d#,g#5,d#,g#,2d#,g#.,8f,d#,c#,c,p,a#5,p,g#.5,d#,g#";
+        static char song[] = "Mario:d=4,o=5,b=115:32p,16e6,16e6,16p,16e6,16p,16c6,16e6,16p,16g6,8p,16p,16g,8p,32p,16c6,8p,16g,8p,16e,8p,16a,16p,16b,16p,16a#,16a,16p,16g,16e6,16g6,16a6,16p,16f6,16g6,16p,16e6,16p,16c6,16d6,16b,p,16g6,16f#6,16f6,16d#6,16p,16e6,16p,16g#,16a,16c6,16p,16a,16c6,16d6,8p,8d#6,16p,16d6,8p,8c6";
+        buzzer_play_rtttl(song);
     break;
 
     case KEYPAD_EVENT_RELEASE:

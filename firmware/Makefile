@@ -20,7 +20,7 @@ BOOT_OFFSET := 0x400
 ## Serial port of a picchick compatible programmer
 PROGRAMMER_PORT := /dev/ttyUSB0
 
-PROGRAMMER_BAUD := 115200
+PROGRAMMER_BAUD := 500000
 
 
 
@@ -72,7 +72,9 @@ SOURCES := $(shell find $(SOURCE_DIR) -name '*.c')
 OBJECTS := $(SOURCES:%.c=$(BUILD_DIR)/%.p1)
 
 # Generate list of dependency files
-DEPENDS := $(SOURCES:%.c=$(BUILD_DIR)/%.d)
+# DEPENDS := $(SOURCES:%.c=$(BUILD_DIR)/%.d)
+# Generate list from actual files in directory to get around a bug introduced in make 4.4
+DEPENDS := $(shell find $(BUILD_DIR) -name '*.d')
 
 ## Generate list of folders in build directory
 # BUILD_FILE_DIRS = $(shell find $(BUILD_DIR) -type d)
@@ -181,4 +183,5 @@ help:
 	@echo "Error: Unknown command"
 	@make help
 
--include $(DEPENDS)
+# Include dependency rules
+include $(DEPENDS)

@@ -7,23 +7,37 @@
 
 #include "drivers/pins.h"
 #include "drivers/ioc.h"
+#include "drivers/timers.h"
 
 #include "lib/isr.h"
 #include "lib/events.h"
 
 #include "lib/buttons.h"
 
+#define DEBOUNCE_PERIOD 10
 
-static unsigned char button_mode = 0;
-static unsigned char button_adj  = 0;
+static unsigned char button_mode_pressed = 0;
+static unsigned char button_adj_pressed  = 0;
+
+// Timer1 timestamp of last event
+static unsigned int last_event_time = 0;
 
 static void     buttons_isr (void);
 
 void
 buttons_init (void)
 {
-    button_mode = 0;
-    button_adj = 0;
+    button_mode_pressed = 0;
+    button_adj_pressed = 0;
+    last_event_time = 0;
+
+    // Init timer
+    timer1_init();
+
+    // Start timer
+    // TODO: We should only start the timer when a button (or keypad) is down
+    timer1_start();
+    
 
     // Disable IOC interrupts while configuring pins.
     //
@@ -52,9 +66,8 @@ buttons_init (void)
     //
     ioc_pin_enable(IOC_PORTC, 5, IOC_EDGE_BOTH);
     ioc_pin_enable(IOC_PORTC, 4, IOC_EDGE_BOTH);
-#   endif
 
-#   if (2 == PCB_REV)
+#   else   // (2 == PCB_REV)
 #   define BUTTON_MODE          PORTBbits.RB6
 #   define BUTTON_MODE_INT      IOCBFbits.IOCBF6
 #   define BUTTON_MODE_MASK     0b01000000
@@ -88,6 +101,8 @@ buttons_init (void)
  * Button Interrupt Service Routine.
  * This services the IOC interrupt and determines if a button pin was the
  * trigger, emitting an event if so.
+ * 
+ * Buttons are active low.
 */
 static void
 buttons_isr (void)
@@ -97,22 +112,25 @@ buttons_isr (void)
     {
         if (BUTTON_MODE)
         {
-            if (1 == button_mode)
+            if (1 == button_mode_pressed && (timer1_get() - last_event_time) > DEBOUNCE_PERIOD)
             {
                 // Release event
                 //
+                last_event_time = timer1_get();
                 event_isr(EVENT_ID(EVENT_BUTTON, BUTTON_MODE_RELEASE));
-                button_mode = 0;
+                button_mode_pressed = 0;
             }
         }
         else
         {
-            if (0 == button_mode)
+            // Always detect push events if button is not already pressed
+            if (0 == button_mode_pressed)
             {
                 // Press event
                 //
+                last_event_time = timer1_get();
                 event_isr(EVENT_ID(EVENT_BUTTON, BUTTON_MODE_PRESS));
-                button_mode = 1;
+                button_mode_pressed = 1;
             }
         }
         BUTTON_MODE_INT = 0;
@@ -124,18 +142,20 @@ buttons_isr (void)
     {
         if (BUTTON_ADJ)
         {
-            if (1 == button_adj)
+            if (1 == button_adj_pressed && (timer1_get() - last_event_time) > DEBOUNCE_PERIOD)
             {
+                last_event_time = timer1_get();
                 event_isr(EVENT_ID(EVENT_BUTTON, BUTTON_ADJ_RELEASE));
-                button_adj = 0;
+                button_adj_pressed = 0;
             }
         }
         else
         {
-            if (0 == button_adj)
+            if (0 == button_adj_pressed)
             {
+                last_event_time = timer1_get();
                 event_isr(EVENT_ID(EVENT_BUTTON, BUTTON_ADJ_PRESS));
-                button_adj = 1;
+                button_adj_pressed = 1;
             }
         }
         BUTTON_ADJ_INT = 0;

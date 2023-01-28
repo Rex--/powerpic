@@ -80,6 +80,31 @@ void    timer0_init (void);
 #define timer0_postscaler_set(value) T0CON0bits.T0OUTPS = ((value) & 0x0F)
 
 
+/**
+ * Initialize timer1
+*/
+void    timer1_init (void);
+
+/**
+ * Start timer1.
+ * This sets the ON bit in T1CON.
+*/
+#define timer1_start()      (T1CONbits.ON = 1)
+
+/**
+ * Stop timer1.
+ * This clears the ON bit in T1CON.
+*/
+#define timer1_stop()      (T1CONbits.ON = 0)
+
+/**
+ * Get timer1 value.
+ * This currently reads both 8-bit registers separately to get the 16-bit timer
+ * value. We should look into the 16-bit access mode (configured by setting
+ * T1CON.RD16)
+*/
+#define timer1_get()        (unsigned)(((TMR1H) << 8) | (TMR1L))
+
 
 /**
  * Initialize timer4.

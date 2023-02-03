@@ -6,6 +6,8 @@
 #include <xc.h>
 #include <math.h>   // for llroundf()
 
+#include "drivers/timers.h"
+
 #include "drivers/pwm.h"
 
 
@@ -31,9 +33,8 @@ pwm_init (void)
     // Set pwm pin to output and configure pps
     TRISGbits.TRISG7 = 0;
     RG7PPS = 0x0c;
-#   endif
 
-#   if (2 == PCB_REV)
+#   else
     // Set PWM pin as output
     // We use RG6 for the buzzer
     //
@@ -41,20 +42,19 @@ pwm_init (void)
     RG6PPS = 0x0C;
 #   endif
 
-    // set up timer2
+    // Init up timer4
     //
-    T2CLKCONbits.CS = 0x01;        // clock - Fosc/4
-    T2HLTbits.PSYNC = 1;            // Synced with Fosc
-    // T2CONbits.CKPS = 0b011; // 1:8
-    // T2PR = 64;
-    T2CONbits.ON = 1;
+    timer4_init();
+
+    // Configure PWM4 to use timer4
+    CCPTMRS0bits.P4TSEL = 0b10;
 }
 
 void
 pwm_enable (void)
 {
     // Enable timer
-    // T2CONbits.ON = 1;
+    timer4_start(); 
 
     // Enable PWM
     PWM4CONbits.PWM4EN = 1;
@@ -66,8 +66,8 @@ pwm_disable (void)
     // Disable pwm
     PWM4CONbits.PWM4EN = 0;
 
-    // Disable timer2
-    // T2CONbits.ON = 0;
+    // Disable timer
+    timer4_stop();
 }
 
 void
@@ -83,7 +83,7 @@ pwm_freq_set (unsigned int freq)
     // prescale option with the highest resolution available for the frequency.
 
     int timer_period = 0;
-    // As prescaler values get lower, it allows higer frequencies.
+    // As prescaler values get lower, it allows higher frequencies.
     //
     for (unsigned char timer_prescale = 0; timer_prescale < 8; timer_prescale++)
     {
@@ -100,9 +100,9 @@ pwm_freq_set (unsigned int freq)
             pwm_frequency = freq;
 
             pwm_timer_period = (unsigned char)timer_period;
-            T2PR = pwm_timer_period; // TODO: Don't actually set the period registers until we enable.
+            timer4_period_set(pwm_timer_period); // TODO: Don't actually set the period registers until we enable.
             pwm_timer_prescaler = timer_prescale;
-            T2CONbits.CKPS = pwm_timer_prescaler; // TODO: Same with prescaler
+            timer4_prescaler_set(pwm_timer_prescaler); // TODO: Same with prescaler
             return;
         }
     }
@@ -121,8 +121,7 @@ pwm_freq_get (void)
 void
 pwm_duty_set (unsigned char duty)
 {
-    // TODO: Comments
-    pwm_duty_ratio = duty;
+    pwm_duty_ratio = duty; // LOL -- DUTY!
     pwm_duty_cycle = (unsigned int)lroundf(((float)duty/100) * (4 * (pwm_timer_period + 1)));
 
     PWM4DC = (pwm_duty_cycle << 6);

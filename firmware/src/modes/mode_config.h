@@ -22,7 +22,7 @@
 #include "modes/power.h"
 #include "modes/settings.h"
 #include "modes/thermometer.h"
-#include "modes/stopwatch.h"
+#include "modes/timer.h"
 
 
 enum mode_app_index {
@@ -44,8 +44,8 @@ enum mode_app_index {
 #ifdef _settings_mode_h_
     MODE_SETTINGS,
 #endif
-#ifdef _stopwatch_h_
-    MODE_STOPWATCH,
+#ifdef _timer_h_
+    MODE_TIMER,
 #endif
     MODE_MAX_MODES,
 };
@@ -69,8 +69,8 @@ mode_app_t *mode_list[MODE_MAX_MODES] = {
 #ifdef _settings_mode_h_
     &settings_mode,
 #endif
-#ifdef _stopwatch_h_
-    &stopwatch_mode,
+#ifdef _timer_h_
+    &timer_mode,
 #endif
 };
 

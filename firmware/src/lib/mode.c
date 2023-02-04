@@ -139,11 +139,11 @@ mode_config_defaults (void)
     // Default keypad keymap: Casio
     keypad_keymap_set(KEYMAP_CASIO);
 
-    // Default Display: Blank primary & secondary displays.
+    // Default Display: Blank primary, secondary, and punctuations displays.
     // The sign & misc displays are not touched so they can be 'notifications'.
-    // Each mode is expected to clean up their used punctuation.
     display_primary_clear(0);
     display_secondary_clear(0);
+    display_period_clear(0);
 }
 
 // EOF //

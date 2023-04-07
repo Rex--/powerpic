@@ -10,7 +10,7 @@
 #include "lib/logging.h"
 
 /** Length of UART transmit buffer in bytes */
-#define UART_TX_BUFFER_SIZE    16
+#define UART_TX_BUFFER_SIZE    64
 
 static volatile unsigned char uart_tx_buffer_head = 0;
 static volatile unsigned char uart_tx_buffer_tail = 0;

@@ -13,6 +13,16 @@ extern volatile unsigned char display_needs_update;
 /** Currently configured font to use for displaying characters.*/
 extern const unsigned char * volatile display_font;
 
+#if LOG_LVL >= LOG_LVL_INFO
+
+// The debug display is enabled for every log level
+#define DISPLAY_DEBUG
+
+/** The debug display holds the content of the primary display as ascii characters. */
+extern volatile unsigned char debug_display[8];
+
+#endif
+
 /**
  * Map negative positions to absolute.
  * This does not find the absolute value, it considers negatives to mean

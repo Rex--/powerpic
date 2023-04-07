@@ -21,6 +21,12 @@ volatile unsigned char display_needs_update = 0;
 
 const unsigned char * volatile display_font;
 
+#ifdef DISPLAY_DEBUG
+
+volatile unsigned char debug_display[8];
+
+#endif
+
 /**
  * Initialize the display.
  * This initializes the LCD driver and configures the default state.
@@ -34,6 +40,16 @@ display_init (void)
 
     // Configure our default font.
     display_font = default_font;
+
+#   ifdef DISPLAY_DEBUG
+
+    // Initialize the debug display to blank spaces
+    for (char i = 0; i < 9; i++)
+    {
+        debug_display[i] = ' ';
+    }
+
+#   endif
 }
 
 /**
@@ -46,6 +62,21 @@ display_update (void)
     if (display_needs_update)
     {
         lcd_update();
+
+#       ifdef DISPLAY_DEBUG
+        
+        LOG_INFO("%c%c%c%c%c%c%c%c",
+            debug_display[0],
+            debug_display[1],
+            debug_display[2],
+            debug_display[3],
+            debug_display[4],
+            debug_display[5],
+            debug_display[6],
+            debug_display[7]);
+        
+#       endif
+
         display_needs_update = 0;
     }
 }

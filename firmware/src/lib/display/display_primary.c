@@ -7,6 +7,7 @@
 
 #include "drivers/lcd.h"
 #include "lib/display.h"
+#include "lib/display/fonts.h"
 #include "lib/display/display_priv.h"
 
 
@@ -46,6 +47,9 @@ display_primary_character (signed char position, unsigned char character)
     if (position)
     {
         display_primary_segments(position, segments);
+#       ifdef DISPLAY_DEBUG
+        debug_display[position-1] = character+DISPLAY_CHARACTER_ASCII_OFFSET;
+#       endif
     }
     else
     {
@@ -53,6 +57,9 @@ display_primary_character (signed char position, unsigned char character)
         for (position = 1; position <= LCD_PRIMARY_CHARACTERS; position++)
         {
             display_primary_segments(position, segments);
+#           ifdef DISPLAY_DEBUG
+            debug_display[position-1] = character+DISPLAY_CHARACTER_ASCII_OFFSET;
+#           endif
         }
     }
 }
@@ -267,10 +274,12 @@ display_primary_clear (signed char position)
     if (position)
     {
         display_primary_segments(position, 0);
-        // for (seg = 0; seg < LCD_PRIMARY_CHARACTER_SEGMENTS; seg++)
-        // {
-        //     lcd_primary_clear((unsigned char)position, seg);
-        // }
+
+#       ifdef DISPLAY_DEBUG
+
+        debug_display[position-1] = ' ';
+
+#       endif
     }
 
     // 0 clears whole primary display.
@@ -279,13 +288,14 @@ display_primary_clear (signed char position)
         for (position = 1; position <= LCD_PRIMARY_CHARACTERS; position++)
         {
             display_primary_segments(position, 0);
-            // for (seg = 0; seg < LCD_PRIMARY_CHARACTER_SEGMENTS; seg++)
-            // {
-            //     lcd_primary_clear((unsigned char)position, seg);
-            // }
+
+#           ifdef DISPLAY_DEBUG
+
+            debug_display[position-1] = ' ';
+
+#           endif
         }
     }
-    // display_needs_update = 1;
 }
 
 // EOF //

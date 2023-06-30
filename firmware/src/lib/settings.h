@@ -41,6 +41,16 @@ settings_get_int (unsigned char idh, unsigned char idl);
 void
 settings_set(unsigned char id, unsigned char value);
 
+/**
+ * Set integer value stored as two settings.
+ * 
+ * @param[in]   idh     Setting ID of high byte.
+ * @param[in]   idl     Setting ID of low byte.
+ * @param[in]   value   Value to set.
+*/
+void
+settings_set_int (unsigned char idh, unsigned char idl, unsigned int value);
+
 
 #endif
 

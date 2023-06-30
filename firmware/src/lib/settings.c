@@ -17,11 +17,8 @@ settings_get (unsigned char id)
 unsigned int
 settings_get_int (unsigned char idh, unsigned char idl)
 {
-    unsigned int ret = 0;
-
-    ret = (unsigned int)(nvm_eeprom_read(idh) << 8);  // Get MSB of setting
-    ret |= nvm_eeprom_read(idh);        // Get LSB of setting
-
+    unsigned int ret = (unsigned int)(nvm_eeprom_read(idh) << 8);  // Get MSB of setting
+    ret |= (unsigned int)(nvm_eeprom_read(idl));        // Get LSB of setting
     return ret;
 }
 
@@ -30,6 +27,13 @@ settings_set (unsigned char id, unsigned char value)
 {
     // Right now this function is just a wrapper around writing eeprom.
     nvm_eeprom_write(id, value);
+}
+
+void
+settings_set_int (unsigned char idh, unsigned char idl, unsigned int value)
+{
+    nvm_eeprom_write(idh, (unsigned char)(value >> 8));
+    nvm_eeprom_write(idl, (unsigned char)(value & 0xFF));
 }
 
 

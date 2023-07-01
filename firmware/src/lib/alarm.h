@@ -24,7 +24,7 @@
  * 
  * A couple extra should be enough.
 */
-#define ALARM_MAX_ALARMS    4
+#define ALARM_MAX_ALARMS    10
 
 // We use datetime objects for time and date values
 #include "lib/datetime.h"
@@ -59,7 +59,7 @@ void
 alarm_get (datetime_t *alarm_datetime);
 
 /**
- * Delete the alarm with the event data.
+ * Delete all alarms with the given event data.
  * 
  * @returns The amount of alarms deleted.
 */

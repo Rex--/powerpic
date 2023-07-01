@@ -1,4 +1,4 @@
-/** @file alarm.h
+/** @file alarm.c
  * 
  * This library implements configurable alarms.
 */
@@ -21,14 +21,21 @@
 */
 static datetime_t registered_alarms[ALARM_MAX_ALARMS] = {0};
 
-
 /** Number of currently registered alarms. */
 static unsigned char registered_alarms_count = 0;
+
+/** Index of current registered alarm. */
+static unsigned char registered_alarms_head = 0;
 
 /**
  * This inserts an alarm at the given index. Shifts alarms around if needed.
 */
 void alarm_insert(unsigned char index, datetime_t *alarm_dt);
+
+/**
+ * Delete an alarm event at a given index. Shifts the the alarms up.
+*/
+void alarm_delete(unsigned char index);
 
 /** Alarm interrupt service routine. */
 static void alarm_isr (void);
@@ -37,6 +44,7 @@ void
 alarm_init (void)
 {
     registered_alarms_count = 0;
+    registered_alarms_head = 0;
 
     // Set alarm mask to match HH:MM:SS
     rtcc_alarm_mask_set(0b0110);
@@ -51,7 +59,7 @@ alarm_init (void)
 void
 alarm_get (datetime_t *alarm_datetime)
 {
-    *alarm_datetime = registered_alarms[0];
+    *alarm_datetime = registered_alarms[registered_alarms_head];
 }
 
 void
@@ -67,16 +75,6 @@ alarm_set_time (time_t *alarm_time, unsigned char event_data)
         // Set the time of our alarm.
         alarm_dt.time = *alarm_time;
 
-        // **NOTE**: if a 0 is in the second ones place, the alarm will not
-        // occur. We work around this by just setting 0 to 1. An unwanted effect
-        // of this hack is that e.g. 12:30:00 is considered the same as 12:30:01
-        // and one will not be registered if the other is. We could solve this
-        // by supporting more than one alarm event for a given time.
-        if (0 == (alarm_dt.time.second & 0x0F))
-        {
-            alarm_dt.time.second++;
-        }
-
         // Populate the alarm with current date.
         datetime_today(&alarm_dt.date);
 
@@ -85,6 +83,9 @@ alarm_set_time (time_t *alarm_time, unsigned char event_data)
         // if today is the last day of the month? We work around this currently
         // by just matching the alarm time and not the date. It has yet to be
         // determined how this effects midnight rollover.
+        //
+        // A potential bug is when the next alarm to occur is not on the next
+        // day.
         //
         // Check to see if time is before right now.
         if (alarm_time->hour <= HOURS)
@@ -107,7 +108,7 @@ alarm_set_time (time_t *alarm_time, unsigned char event_data)
                             else
                             {
                                 // If the alarm second is less than the current
-                                // second, we assume the alarm is for tomrrow.
+                                // second, we assume the alarm is for tomorrow.
                                 alarm_dt.date.day += 1;
                             }
                         }
@@ -119,7 +120,7 @@ alarm_set_time (time_t *alarm_time, unsigned char event_data)
                     else
                     {
                         // If the alarm minute is less than the current minute, we
-                        // assume the alarm is for tomrrow.
+                        // assume the alarm is for tomorrow.
                         alarm_dt.date.day += 1;
                     }
                 }
@@ -166,11 +167,9 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
         // - Minute   0-59
         // - Seconds *0-59
 
-        // **NOTE**: if a 0 is in the second ones place, the alarm will not
+        // *NOTE: if a 0 is in the second ones place, the alarm will not
         // occur. We work around this by just setting 0 to 1. An unwanted effect
         // of this hack is that e.g. 12:30:00 is considered the same as 12:30:01
-        // and one will not be registered if the other is. We could solve this
-        // by supporting more than one alarm event for a given time.
         if (0 == (alarm_datetime->time.second & 0x0F))
         {
             alarm_datetime->time.second++;
@@ -180,12 +179,17 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
         alarm_datetime->date.weekday = event_data;
 
         int alarm_index = -1;
+        unsigned char alarm_position = 0;
         
         // Loop through the list of registered alarms and compare.
         // Right now we only compare up to the day, so monthly alarms might now
         // work correctly.
-        for (unsigned char i = 0; i < registered_alarms_count; i++)
+        for (unsigned char c = 0; c < registered_alarms_count; c++)
         {
+            // Loop from head to tail based on the head and the length
+            unsigned char i = (registered_alarms_head + c) % ALARM_MAX_ALARMS;
+            alarm_position = c;
+
             if (alarm_datetime->date.day < registered_alarms[i].date.day)
             {
                 // This is our alarm index
@@ -225,18 +229,30 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
                         else if (alarm_datetime->time.second == registered_alarms[i].time.second)
                         {
                             // An alarm with that time is already registered.
-                            LOG_WARNING("Duplicate alarm");
-                            return;
+                            // Check if this is the last registered alarm.
+                            if ((c+1) == registered_alarms_count)
+                            {
+                                LOG_WARNING("Duplicate alarm added: %.2i:%.2i:%.2i",
+                                    BCD2DEC(alarm_datetime->time.hour),
+                                    BCD2DEC(alarm_datetime->time.minute),
+                                    BCD2DEC(alarm_datetime->time.second)
+                                );
+                                // This is our alarm index
+                                alarm_index = i+1;
+                                alarm_position++;
+                                break;
+                            }
                         }
                         else
                         {
                             // Alarm is after this index
 
                             // Check if this is the last registered alarm.
-                            if ((i+1) == registered_alarms_count)
+                            if ((c+1) == registered_alarms_count)
                             {
                                 // This is our alarm index
                                 alarm_index = i+1;
+                                alarm_position++;
                                 break;
                             }
                         }   
@@ -246,10 +262,11 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
                         // Alarm is after this index
 
                         // Check if this is the last registered alarm.
-                        if ((i+1) == registered_alarms_count)
+                        if ((c+1) == registered_alarms_count)
                         {
                             // This is our alarm index
                             alarm_index = i+1;
+                            alarm_position++;
                             break;
                         }
                     }
@@ -259,10 +276,11 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
                     // Alarm is after this index
 
                     // Check if this is the last registered alarm.
-                    if ((i+1) == registered_alarms_count)
+                    if ((c+1) == registered_alarms_count)
                     {
                         // This is our alarm index
                         alarm_index = i+1;
+                        alarm_position++;
                         break;
                     }
                 }
@@ -272,10 +290,11 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
                 // Alarm is after this index
 
                 // Check if this is the last registered alarm.
-                if ((i+1) == registered_alarms_count)
+                if ((c+1) == registered_alarms_count)
                 {
                     // This is our alarm index
                     alarm_index = i+1;
+                    alarm_position++;
                     break;
                 }
             }
@@ -288,7 +307,7 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
             if (0 == registered_alarms_count)
             {
                 // Alarm is the only registered alarm
-                alarm_index = 0;
+                alarm_index = registered_alarms_head;
             }
             else
             {
@@ -298,14 +317,14 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
             }
         }
 
-        // Increment the count of registered alarms.
-        registered_alarms_count++;
+        // Handle tail wrapping
+        alarm_index = alarm_index % ALARM_MAX_ALARMS;
 
         // Insert our alarm into the list.
         alarm_insert((unsigned char)alarm_index, alarm_datetime);
 
         LOG_INFO("Registered alarm (%i/%i) %.2i:%.2i:%.2i %.2i/%.2i x%.2X%.2X",
-            alarm_index+1,
+            alarm_position+1,
             registered_alarms_count,
             BCD2DEC(alarm_datetime->time.hour),
             BCD2DEC(alarm_datetime->time.minute),
@@ -315,8 +334,6 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
             alarm_datetime->date.weekday,
             ALARM_EVENT
         );
-
-
     }
     else
     {
@@ -337,8 +354,11 @@ alarm_del_event (unsigned char event_data)
     // Loop through the registered_alarm list and remove alarms that have the
     // specified event_data. The event_data is stored in the weekday field.
 
-    for (int i = registered_alarms_count-1; i >= 0; i--)
+    for (unsigned char c = 0; c < registered_alarms_count; c++)
     {
+        // Loop from head to tail based on the head and the length
+        unsigned char i = (registered_alarms_head + c) % ALARM_MAX_ALARMS;
+
         if (event_data == registered_alarms[i].date.weekday)
         {
             LOG_DEBUG("Removing alarm: (x%.2X) %.2i:%.2i",
@@ -347,40 +367,163 @@ alarm_del_event (unsigned char event_data)
                 BCD2DEC(registered_alarms[i].time.minute)
             );
 
-            // Remove alarm and shift all other up.
-            // registered_alarms[i] = (datetime_t){0};
+            // Remove alarm
+            alarm_delete(i);
             deleted_alarms++;
-            registered_alarms_count--;
 
-            for (int j = i+1; j < registered_alarms_count; j++)
-            {
-                registered_alarms[j-1].time = registered_alarms[j].time;
-                registered_alarms[j-1].date = registered_alarms[j].date;
-            }
+            // Resume search from previous index
+            c--;
         }
     }
 
     return deleted_alarms;
 }
 
+void
+alarm_delete (unsigned char index)
+{
+    // Bail early if the index is not in the range of registered alarms.
+    if (!(((index >= registered_alarms_head) && (index-registered_alarms_head <= registered_alarms_count)) ||
+        ((index < registered_alarms_head) && (index < (registered_alarms_head+registered_alarms_count)%ALARM_MAX_ALARMS))))
+        {
+            LOG_ERROR("Alarm is out of bounds!");
+            return;
+        }
+
+    // Shift up all alarms that are:
+    // 1) Behind the head
+    // 2) Behind the index
+    // 3) Before the end of the buffer (no wrapping)
+    //
+    //    head v   v index         index v     v head
+    // 0 1 2 3 4 5 6 7 8 9           0 1 2 3 4 5 6 7 8 9
+    //    shift left ^ ^ ^
+
+    if (index >= registered_alarms_head)
+    {
+        for (unsigned char i = index+1; i < ALARM_MAX_ALARMS; i++)
+        {
+            // Shift each time and date to the previous position
+            registered_alarms[i-1].time = registered_alarms[i].time;
+            registered_alarms[i-1].date = registered_alarms[i].date;
+        }
+    }
+
+
+    // Next, handle the wrapping of the circular buffer if needed
+    //
+    //    head v   v index         index v     v head
+    // 0 1 2 3 4 5 6 7 8 9           0 1 2 3 4 5 6 7 8 9
+    // > (if count > 6)  ^
+
+    if ((index >= registered_alarms_head) && (registered_alarms_head+registered_alarms_count > ALARM_MAX_ALARMS))
+    {
+        // Shift index 0 to the last index
+        registered_alarms[ALARM_MAX_ALARMS-1].time = registered_alarms[0].time;
+        registered_alarms[ALARM_MAX_ALARMS-1].date = registered_alarms[0].date;
+
+        // Set index to 0
+        // This will shift all alarms from index 1 until the tail in the next loop
+        index = 0;
+    }
+
+
+    // Finally, shift the alarms at the beginning (end):
+    // 1) Before the head
+    // 2) Before the tail
+    // 3) Behind the index
+    //
+    //    head v   v index         index v     v head
+    // 0 1 2 3 4 5 6 7 8 9           0 1 2 3 4 5 6 7 8 9
+    //   ^ ^ ^ shift left                  ^ ^ shift left
+
+    if (registered_alarms_head+registered_alarms_count > ALARM_MAX_ALARMS)
+    {
+        for (unsigned char i = index+1; i < (registered_alarms_head+registered_alarms_count)%ALARM_MAX_ALARMS; i++)
+        {
+            // Shift each time and date to the previous position
+            registered_alarms[i-1].time = registered_alarms[i].time;
+            registered_alarms[i-1].date = registered_alarms[i].date;
+        }
+    }
+
+    // Decrement alarm count
+    registered_alarms_count--;
+
+}
 
 void
 alarm_insert (unsigned char index, datetime_t *alarm_dt)
 {
-    // Shift alarms behind 
-    for (int i = registered_alarms_count; i >= index; i--)
+    // Shift down all alarms that are:
+    // 1) Before the head
+    // 2) Behind the index (in order)
+    // 3) Before the tail
+    //
+    //    head v   v index         index v     v head
+    // 0 1 2 3 4 5 6 7 8 9           0 1 2 3 4 5 6 7 8 9
+    // ^ ^ ^ right shift                 ^ ^ right shift
+
+    if (registered_alarms_head+registered_alarms_count > ALARM_MAX_ALARMS) // Check if the buffer wraps around
     {
-        registered_alarms[i+1].time = registered_alarms[i].time;
-        registered_alarms[i+1].date = registered_alarms[i].date;
+        unsigned char start;
+        if (index >= registered_alarms_head)
+        {
+            start = 0; // If index is behind the head, shift all of the alarms
+        } else {
+            start = index; // Else shift until the index
+        }
+        for (unsigned char i = (registered_alarms_head+registered_alarms_count)%ALARM_MAX_ALARMS;i > start; i--)
+        {
+            // Shift each time and date to the following position
+            registered_alarms[i].time = registered_alarms[i-1].time;
+            registered_alarms[i].date = registered_alarms[i-1].date;
+        }
     }
 
-    // Insert alarm at the index
+
+    // Next, handle the wrapping of the circular buffer if needed
+    //
+    //    head v   v index         index v     v head
+    // 0 1 2 3 4 5 6 7 8 9           0 1 2 3 4 5 6 7 8 9
+    // ^ (if count > 6) <<
+
+    if ((index >= registered_alarms_head) && (registered_alarms_head+registered_alarms_count > ALARM_MAX_ALARMS))
+    {
+        // Shift the last index to index 0
+        registered_alarms[0].time = registered_alarms[ALARM_MAX_ALARMS-1].time;
+        registered_alarms[0].date = registered_alarms[ALARM_MAX_ALARMS-1].date;
+    }
+
+
+    // Finally, shift the alarms at the end (beginning):
+    // 1) After the head
+    // 2) Before the end of the buffer
+    // 3) Behind the index
+    //
+    //    head v   v index         index v     v head
+    // 0 1 2 3 4 5 6 7 8 9           0 1 2 3 4 5 6 7 8 9
+    // shift right ^ ^ ^
+
+    if (index >= registered_alarms_head)
+    {
+        for (unsigned char i = ALARM_MAX_ALARMS-1; i > index; i--)
+        {
+            // Shift each time and date to the following position
+            registered_alarms[i].time = registered_alarms[i-1].time;
+            registered_alarms[i].date = registered_alarms[i-1].date;
+        }
+    }
+
+    // After shift the alarms around we can insert it at the position
     registered_alarms[index] = *alarm_dt;
 
-    // If the alarm is going to happen the soonest (index 0), then set the
-    // alarm registers.
+    // Increment alarm count
+    registered_alarms_count++;
 
-    if (0 == index)
+    // If the alarm is going to happen the soonest (head), then set the
+    // alarm registers.
+    if (index == registered_alarms_head)
     {
         // Disable alarm to change registers
         rtcc_alarm_disable();
@@ -400,33 +543,69 @@ alarm_insert (unsigned char index, datetime_t *alarm_dt)
 static void
 alarm_isr (void)
 {
-    // Alarm with index 0 has occurred. alarm is disabled.
+    // Alarm at head has occurred. alarm is disabled.
     rtcc_alarm_disable();
 
-    // Emit an alarm event with the specified data.
-    event_isr((unsigned)
-        EVENT_ID(
-            ALARM_EVENT,
-            registered_alarms[0].date.weekday)
-    );
-
-    // Shift alarms down
-    for (int i = 1; i < registered_alarms_count; i++)
+    unsigned char consumed_alarms = 0;
+    // Match all alarms and emit events
+    for (unsigned char c = 0; c < registered_alarms_count; c++)
     {
-        registered_alarms[i-1].time = registered_alarms[i].time;
-        registered_alarms[i-1].date = registered_alarms[i].date;
+        // Loop from head to tail based on the head and the length
+        unsigned char i = (registered_alarms_head + c) % ALARM_MAX_ALARMS;
+
+        if (registered_alarms[registered_alarms_head].time.second == registered_alarms[i].time.second)
+        {
+            if (registered_alarms[registered_alarms_head].time.minute == registered_alarms[i].time.minute)
+            {
+                if (registered_alarms[registered_alarms_head].time.hour == registered_alarms[i].time.hour)
+                {
+                    if (registered_alarms[registered_alarms_head].date.day == registered_alarms[i].date.day)
+                    {
+                        if (registered_alarms[registered_alarms_head].date.month == registered_alarms[i].date.month)
+                        {
+                            if (registered_alarms[registered_alarms_head].date.year == registered_alarms[i].date.year)
+                            {
+                                // Alarm matches
+                                consumed_alarms++;
+                                // Emit event
+                                event_isr((unsigned)
+                                    EVENT_ID(
+                                        ALARM_EVENT,
+                                        registered_alarms[i].date.weekday)
+                                );
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        } else {
+            break;
+        }
     }
 
+    // Consume alarm(s)
+    registered_alarms_head = (registered_alarms_head + consumed_alarms) % ALARM_MAX_ALARMS;
+
     // Decrement count of registered alarms
-    registered_alarms_count--;
+    registered_alarms_count -= consumed_alarms;
 
     // Check if we have any alarms registered
     if (registered_alarms_count)
     {
-        // Set alarm registers with index 0 values.
-        ALRMHR  = registered_alarms[0].time.hour;
-        ALRMMIN = registered_alarms[0].time.minute;
-        ALRMSEC = registered_alarms[0].time.second;
+        // Set alarm registers with head values.
+        ALRMHR  = registered_alarms[registered_alarms_head].time.hour;
+        ALRMMIN = registered_alarms[registered_alarms_head].time.minute;
+        ALRMSEC = registered_alarms[registered_alarms_head].time.second;
         
         rtcc_alarm_enable();
     }

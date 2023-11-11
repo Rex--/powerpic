@@ -45,6 +45,13 @@ static unsigned char date_looksie = 0;     // Flag is set when divde button is d
 void
 clock_init (void)
 {
+    // Default state
+    date_looksie = 0;
+}
+
+void
+clock_start (void)
+{
     // Load clock_fmt from settings
     clock_fmt = settings_get(SETTING_CLOCK_FMT);
 
@@ -58,18 +65,8 @@ clock_init (void)
         settings_set(SETTING_CLOCK_FMT, 0);
     }
 
-    // Default state
-    date_looksie = 0;
-}
-
-void
-clock_start (void)
-{
     // Get current time
     datetime_now(&now);
-
-    // Clear display
-    display_primary_clear(0);
 
     // Draw time
     clock_draw_time(&now.time);
@@ -84,18 +81,22 @@ clock_start (void)
 signed char
 clock_run (unsigned int event)
 {
-    if (EVENT_TYPE(event) == EVENT_TICK)
+    switch (EVENT_TYPE(event))
     {
-        // Get current time
-        datetime_time_now(&now.time);
-
-        // We update the date every hour on the hour
-        if (0 == (now.time.minute | now.time.second))
+    case EVENT_TICK:
+        // Sync current time with rtc every minute
+        if (0 == now.time.second)
         {
-            datetime_today(&now.date);
+            datetime_time_now(&now.time);
 
-            // Also update the weekday display
-            clock_draw_weekday(now.date.weekday);
+            // We update the date every hour on the hour
+            if (0 == now.time.minute)
+            {
+                datetime_today(&now.date);
+
+                // Also update the weekday display
+                clock_draw_weekday(now.date.weekday);
+            }
         }
 
         // If the divide key is down, we draw the date
@@ -106,14 +107,14 @@ clock_run (unsigned int event)
         }
         else
         {
+            // Increment seconds
+            now.time.second = (unsigned char)DEC2BCD((BCD2DEC(now.time.second)+1) % 60);
             // Draw time
             clock_draw_time(&now.time);
         }
+    break;
 
-    }
-
-    if (EVENT_TYPE(event) == KEYPAD_EVENT_PRESS)
-    {
+    case KEYPAD_EVENT_PRESS:
         if (EVENT_DATA(event) == '/')
         {
             // Divide key shows full date
@@ -134,9 +135,9 @@ clock_run (unsigned int event)
         {
             backlight_set(BACKLIGHT_ON);
         }
-    }
-    else if (EVENT_TYPE(event) == KEYPAD_EVENT_RELEASE)
-    {
+    break;
+
+    case KEYPAD_EVENT_RELEASE:
         if (EVENT_DATA(event) == '/')
         {
             // Draw time on key release
@@ -150,10 +151,9 @@ clock_run (unsigned int event)
         {
             backlight_set(BACKLIGHT_OFF);
         }
-    }
+    break;
 
-    if (EVENT_TYPE(event) == EVENT_BUTTON)
-    {
+    case EVENT_BUTTON:
         if (EVENT_DATA(event) == BUTTON_MODE_PRESS)
         {
             // Switch to next mode
@@ -170,6 +170,10 @@ clock_run (unsigned int event)
             // Start the edit procedure
             clock_edit_start();
         }
+    break;
+    
+    default:
+    break;
     }
     return 0;
 }
@@ -180,9 +184,6 @@ clock_stop (void)
     // Clear AM/PM for next mode
     display_misc_clear(DISPLAY_MISC_AM);
     display_misc_clear(DISPLAY_MISC_PM);
-
-    // Clear colon for next mode
-    display_period_clear(DISPLAY_PERIOD_COLON);
 }
 
 

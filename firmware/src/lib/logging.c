@@ -36,7 +36,7 @@ logging_init (void)
 }
 
 void
-putch (unsigned char data)
+putch (char data)
 {
     while (0 == uart_tx_buffer_remaining)
     {

@@ -39,7 +39,7 @@
 /** Power-up Timer Selection.
  * We use the internal oscillator so no delay is needed.
 */
-#pragma config PWRTE = OFF
+#pragma config PWRTS = OFF
 
 /** Low-Power BOR Enable */
 #pragma config LPBOREN = OFF

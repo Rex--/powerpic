@@ -85,7 +85,7 @@
 #endif
 
 void    logging_init (void);
-void    putch (unsigned char data);
+void    putch (char data);
 
 #endif
 

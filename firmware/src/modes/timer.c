@@ -234,7 +234,7 @@ timer_countdown_run (unsigned int event)
             timer_display_time(&timer_countdown_time);
             if (timer_countdown_time.second > 0)
             {
-                timer_countdown_time.second = DEC2BCD(BCD2DEC(timer_countdown_time.second) - 1);
+                timer_countdown_time.second = (unsigned char)DEC2BCD(BCD2DEC(timer_countdown_time.second) - 1);
             }
             else // Minute rollover
             {
@@ -242,7 +242,7 @@ timer_countdown_run (unsigned int event)
 
                 if (timer_countdown_time.minute > 0)
                 {
-                    timer_countdown_time.minute = DEC2BCD(BCD2DEC(timer_countdown_time.minute) - 1);
+                    timer_countdown_time.minute = (unsigned char)DEC2BCD(BCD2DEC(timer_countdown_time.minute) - 1);
                 }
                 else // Hour rollover
                 {
@@ -250,7 +250,7 @@ timer_countdown_run (unsigned int event)
 
                     if (timer_countdown_time.hour > 0)
                     {
-                        timer_countdown_time.hour = DEC2BCD(BCD2DEC(timer_countdown_time.hour) - 1);
+                        timer_countdown_time.hour = (unsigned char)DEC2BCD(BCD2DEC(timer_countdown_time.hour) - 1);
                     }
                     else // Timer is finished
                     {
@@ -356,9 +356,9 @@ timer_countdown_run (unsigned int event)
                 {
                     unsigned char new_number = (unsigned char)EVENT_DATA(event) - 48; // Event data contains the number in ascii, we subtract 48 to get the numerical value of the ascii representation
                     // We shift all the numbers one left when a new number is input
-                    timer_countdown_reset.hour = (timer_countdown_reset.hour << 4) | (timer_countdown_reset.minute >> 4);
-                    timer_countdown_reset.minute = (timer_countdown_reset.minute << 4) | (timer_countdown_reset.second >> 4);
-                    timer_countdown_reset.second = (timer_countdown_reset.second << 4) | (new_number);
+                    timer_countdown_reset.hour = (unsigned char)((timer_countdown_reset.hour << 4) | (timer_countdown_reset.minute >> 4));
+                    timer_countdown_reset.minute = (unsigned char)((timer_countdown_reset.minute << 4) | (timer_countdown_reset.second >> 4));
+                    timer_countdown_reset.second = (unsigned char)((timer_countdown_reset.second << 4) | (new_number));
                     // Update display with new time
 
                     timer_display_time(&timer_countdown_reset);

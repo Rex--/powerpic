@@ -61,6 +61,10 @@
 
 
 
+// The bootloader we use doesn't allow us to define configuration words 3-5.
+// It's okay, because we didn't use them anyways.
+#if 0
+
 // Configuration Word 3
 
 /** WDT Period Select **/
@@ -76,9 +80,7 @@
 #pragma config WDTCCS = SOSC
 
 
-// The bootloader we use doesn't allow us to define configuration words 4 or 5.
-// It's okay, because we didn't use them anyways.
-#if 0
+
 // Configuration Word 4
 
 /** Boot Block Size Selection **/

@@ -22,10 +22,10 @@
 static datetime_t registered_alarms[ALARM_MAX_ALARMS] = {0};
 
 /** Number of currently registered alarms. */
-static unsigned char registered_alarms_count = 0;
+static volatile unsigned char registered_alarms_count = 0;
 
 /** Index of current registered alarm. */
-static unsigned char registered_alarms_head = 0;
+static volatile unsigned char registered_alarms_head = 0;
 
 /**
  * This inserts an alarm at the given index. Shifts alarms around if needed.
@@ -165,15 +165,7 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
         // TODO: Verify alarm is within bounds of time:
         // - Hour     0-23
         // - Minute   0-59
-        // - Seconds *0-59
-
-        // *NOTE: if a 0 is in the second ones place, the alarm will not
-        // occur. We work around this by just setting 0 to 1. An unwanted effect
-        // of this hack is that e.g. 12:30:00 is considered the same as 12:30:01
-        if (0 == (alarm_datetime->time.second & 0x0F))
-        {
-            alarm_datetime->time.second++;
-        }
+        // - Seconds  0-59
 
         // We store the event data in the weekday field
         alarm_datetime->date.weekday = event_data;
@@ -323,14 +315,18 @@ alarm_set_datetime (datetime_t *alarm_datetime, unsigned char event_data)
         // Insert our alarm into the list.
         alarm_insert((unsigned char)alarm_index, alarm_datetime);
 
-        LOG_INFO("Registered alarm (%i/%i) %.2i:%.2i:%.2i %.2i/%.2i x%.2X%.2X",
+        // rtcc_alarm_interrupt_enable();
+        // LOG_DEBUG("ALARM: %x %x %x", ALRMCON, ALRMRPT, PIE8);
+
+        LOG_INFO("Registered alarm [%i] (%i/%i) %.2i:%.2i:%.2i %.2i/%.2i x%.2X%.2X",
+            alarm_index,
             alarm_position+1,
             registered_alarms_count,
             BCD2DEC(alarm_datetime->time.hour),
             BCD2DEC(alarm_datetime->time.minute),
             BCD2DEC(alarm_datetime->time.second),
-            BCD2DEC(alarm_datetime->date.day),
             BCD2DEC(alarm_datetime->date.month),
+            BCD2DEC(alarm_datetime->date.day),
             alarm_datetime->date.weekday,
             ALARM_EVENT
         );
@@ -525,17 +521,41 @@ alarm_insert (unsigned char index, datetime_t *alarm_dt)
     // alarm registers.
     if (index == registered_alarms_head)
     {
+        // LOG_DEBUG("Setting alarm HEAD");
+
+        // Enable RTCC writes (for alarm enable bit)
+        rtcc_writes_enable();
+
         // Disable alarm to change registers
         rtcc_alarm_disable();
 
         // Set Registers
         // ALRMDAY = registered_alarms[0].date.day;
-        ALRMHR  = registered_alarms[0].time.hour;
-        ALRMMIN = registered_alarms[0].time.minute;
-        ALRMSEC = registered_alarms[0].time.second;
+        ALRMHR  = registered_alarms[index].time.hour;
+        ALRMMIN = registered_alarms[index].time.minute;
+        if (0 == (registered_alarms[index].time.second & 0x0F))
+        {
+            // if (0 == registered_alarms[index].time.second)
+            // {
+            //     ALRMSEC = 0x5A;
+            //     ALRMMIN = DEC2BCD(BCD2DEC(registered_alarms[index].time.minute) - 1);
+            // }
+            // else
+            // {
+            //     ALRMSEC = (((registered_alarms[index].time.second >> 4) - 1) << 4 | 0xA);
+            // }
+            ALRMSEC = registered_alarms[index].time.second + 1;
+        }
+        else
+        {
+            ALRMSEC = registered_alarms[index].time.second;
+        }
 
         // Enable alarm
         rtcc_alarm_enable();
+
+        // Disable writes
+        rtcc_writes_disable();
     }
 }
 
@@ -544,26 +564,32 @@ static void
 alarm_isr (void)
 {
     // Alarm at head has occurred. alarm is disabled.
-    rtcc_alarm_disable();
+    // rtcc_alarm_disable();
 
-    unsigned char consumed_alarms = 0;
+    unsigned char consumed_alarms = 1;
+    // Emit event of alarm that triggered interrupt
+    event_isr((unsigned)
+        EVENT_ID(
+            ALARM_EVENT,
+            registered_alarms[registered_alarms_head].date.weekday)
+    );
     // Match all alarms and emit events
-    for (unsigned char c = 0; c < registered_alarms_count; c++)
+    for (unsigned char c = 1; c < registered_alarms_count; c++)
     {
         // Loop from head to tail based on the head and the length
         unsigned char i = (registered_alarms_head + c) % ALARM_MAX_ALARMS;
 
-        if (registered_alarms[registered_alarms_head].time.second == registered_alarms[i].time.second)
+        if (registered_alarms[registered_alarms_head].time.second >= registered_alarms[i].time.second)
         {
-            if (registered_alarms[registered_alarms_head].time.minute == registered_alarms[i].time.minute)
+            if (registered_alarms[registered_alarms_head].time.minute >= registered_alarms[i].time.minute)
             {
-                if (registered_alarms[registered_alarms_head].time.hour == registered_alarms[i].time.hour)
+                if (registered_alarms[registered_alarms_head].time.hour >= registered_alarms[i].time.hour)
                 {
-                    if (registered_alarms[registered_alarms_head].date.day == registered_alarms[i].date.day)
+                    if (registered_alarms[registered_alarms_head].date.day >= registered_alarms[i].date.day)
                     {
-                        if (registered_alarms[registered_alarms_head].date.month == registered_alarms[i].date.month)
+                        if (registered_alarms[registered_alarms_head].date.month >= registered_alarms[i].date.month)
                         {
-                            if (registered_alarms[registered_alarms_head].date.year == registered_alarms[i].date.year)
+                            if (registered_alarms[registered_alarms_head].date.year >= registered_alarms[i].date.year)
                             {
                                 // Alarm matches
                                 consumed_alarms++;
@@ -605,9 +631,29 @@ alarm_isr (void)
         // Set alarm registers with head values.
         ALRMHR  = registered_alarms[registered_alarms_head].time.hour;
         ALRMMIN = registered_alarms[registered_alarms_head].time.minute;
-        ALRMSEC = registered_alarms[registered_alarms_head].time.second;
+        if (0 == (registered_alarms[registered_alarms_head].time.second & 0x0F))
+        {
+            // if (0 == registered_alarms[registered_alarms_head].time.second)
+            // {
+            //     ALRMSEC = 0x5A;
+            //     ALRMMIN = DEC2BCD(BCD2DEC(registered_alarms[registered_alarms_head].time.minute) - 1);
+            // }
+            // else
+            // {
+            //     ALRMSEC = (((registered_alarms[registered_alarms_head].time.second >> 4) - 1) << 4 | 0xA);
+            //     // ALRMSEC = ((registered_alarms[registered_alarms_head].time.second & 0xF0) | 0xA);
+            // }
+            ALRMSEC = registered_alarms[registered_alarms_head].time.second + 1;
+        }
+        else
+        {
+            ALRMSEC = registered_alarms[registered_alarms_head].time.second;
+        }
         
+        // Enable alarm (write enable required)
+        rtcc_writes_enable();
         rtcc_alarm_enable();
+        rtcc_writes_disable();
     }
 
     // Clear alarm interrupt flag

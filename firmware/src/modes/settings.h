@@ -1,10 +1,8 @@
 /** @file settings.h
  * 
  * This mode provides a way to configure watch settings.
+ * Each setting can be edited as a 8-bit byte, with an ID of 0-255.
  * 
- * Settings include:
- *  1. rtc - RTCC Drift calibration. -128 to 127. Positive value for slow
- *          clock, negative value for fast.
 */
 
 #ifndef _settings_mode_h_
@@ -22,5 +20,6 @@ mode_app_t settings_mode = {
 };
 
 #endif
+
 
 // EOF //

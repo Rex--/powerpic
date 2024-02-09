@@ -27,14 +27,20 @@ void
 datetime_init (void)
 {
     LOG_INFO("Initializing rtcc...");
-    // Init and enable rtcc driver
+
+#   ifdef DTINIT_SEC
+    // The DTINIT_* macros allow us to set an initial date and time at compile time
+    rtcc_time_set(DTINIT_HOUR, DTINIT_MIN, DTINIT_SEC);
+    rtcc_date_set(DTINIT_YEAR, DTINIT_MONTH, DTINIT_DAY, DTINIT_WDAY);
+
+#   else
+    // Set time to a default value
+    rtcc_date_set(0x22, 0x04, 0x20, 0);
+    rtcc_time_set(0x16, 0x19, 0);
+
+#   endif
+
     rtcc_init();
-    rtcc_writes_enable();
-    while (0 == rtcc_status())
-    {
-        rtcc_enable();
-    }
-    rtcc_writes_disable();
 }
 
 
@@ -53,15 +59,9 @@ datetime_set (datetime_t *dt)
         BCD2DEC(dt->date.day),                  \
         datetime_weekday_str(dt->date.weekday)  \
     );
-    rtcc_writes_enable();
-    
-    while (rtcc_writes_discouraged())
-    {
-        // Wait for sync bit
-    }
+
     rtcc_time_set(dt->time.hour, dt->time.minute, dt->time.second);
     rtcc_date_set(dt->date.year, dt->date.month, dt->date.day, dt->date.weekday);
-    rtcc_writes_disable();
 }
 
 void
@@ -100,13 +100,8 @@ datetime_time_set (time_t *t)
         BCD2DEC(t->minute),                     \
         BCD2DEC(t->second)                      \
     );
-    rtcc_writes_enable();
-    while (rtcc_writes_discouraged())
-    {
-        // Wait for sync bit
-    }
+
     rtcc_time_set(t->hour, t->minute, t->second);
-    rtcc_writes_disable();
 }
 
 void
@@ -139,11 +134,11 @@ datetime_today (date_t *d)
     // This warns of a stack overflow if you call _today()
     // from a mode application and have debug logging enabled.
 #   if 0
-    LOG_DEBUG("Today: 20%.2i/%.2i/%.2i",
+    LOG_DEBUG("Today: 20%.2i/%.2i/%.2i %s",
         BCD2DEC(d->year),
         BCD2DEC(d->month),
-        BCD2DEC(d->day)
-        // &weekday_str[d->weekday][0]
+        BCD2DEC(d->day),
+        &weekday_str[d->weekday]
     );
 #   endif
 }

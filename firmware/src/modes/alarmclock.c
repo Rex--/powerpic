@@ -20,17 +20,20 @@
 #define LOG_TAG "mode.alarmclock"
 #include "lib/logging.h"
 
-// Time object that holds our daily alarm. If the seconds is 0, alarm
-// is disabled. If the seconds is 1, alarm is enabled.
+
+// Status of daily alarm. 0 is disabled
+static unsigned char daily_alarm_enabled = 0;
+// Time object that holds our daily alarm.
 static time_t daily_alarm = {
     .hour   = 0x16,
     .minute = 0x20,
     .second = 0x00
 };
 
-// Time object to hold the next hourly alarm. If the seconds is 0, hourly chime
-// is disabled. If the seconds is 1, hourly chime is enabled.
-static time_t hourly_alarm = {0};
+// Status of daily alarm. 0 is disabled
+static unsigned char hourly_alarm_enabled = 0;
+// Time object to hold the next hourly alarm.
+static time_t hourly_alarm;
 
 // Draw the daily alarm time to the display.
 void daily_alarm_draw (void);
@@ -56,13 +59,13 @@ alarmclock_start (void)
     display_primary_clear(0);
     daily_alarm_draw();
 
-    if (daily_alarm.second)
+    if (daily_alarm_enabled)
     {
         // If the daily alarm is enabled, draw the wave
         display_misc(DISPLAY_MISC_WAVE);
     }
 
-    if (hourly_alarm.second)
+    if (hourly_alarm_enabled)
     {
         // If the hourly chime is enabled, draw the bell
         display_misc(DISPLAY_MISC_BELL);
@@ -89,15 +92,15 @@ alarmclock_run (unsigned int event)
         if (EVENT_DATA(event) == '*')
         {
             // Multiply key is used to toggle hourly chime
-            if (hourly_alarm.second)
+            if (hourly_alarm_enabled)
             {
-                hourly_alarm.second = 0;
+                hourly_alarm_enabled = 0;
                 display_misc_clear(DISPLAY_MISC_BELL);
                 alarm_del_event(ALARMCLOCK_EVENT_CHIME);
             }
             else
             {
-                hourly_alarm.second = 1;
+                hourly_alarm_enabled = 1;
                 display_misc(DISPLAY_MISC_BELL);
                 hourly_alarm_update();
                 alarm_set_time(&hourly_alarm, ALARMCLOCK_EVENT_CHIME);
@@ -107,16 +110,16 @@ alarmclock_run (unsigned int event)
         if (EVENT_DATA(event) == '4')
         {
             // 4 key  is used to toggle daily alarm
-            if (daily_alarm.second)
+            if (daily_alarm_enabled)
             {
-                daily_alarm.second = 0;
+                daily_alarm_enabled = 0;
                 display_misc_clear(DISPLAY_MISC_WAVE);
 
                 alarm_del_event(ALARMCLOCK_EVENT_DAILY);
             }
             else
             {
-                daily_alarm.second = 1;
+                daily_alarm_enabled = 1;
                 display_misc(DISPLAY_MISC_WAVE);
 
                 alarm_set_time(&daily_alarm, ALARMCLOCK_EVENT_DAILY);
@@ -429,7 +432,7 @@ alarmclock_edit (unsigned int event)
                 }
             }
 
-            if (daily_alarm.second)
+            if (daily_alarm_enabled)
             {
                 // Alarm is enabled, register alarm
                 
@@ -460,8 +463,6 @@ alarmclock_edit (unsigned int event)
 void
 hourly_alarm_update (void)
 {
-    unsigned char chime_enabled = hourly_alarm.second;
-
     datetime_time_now(&hourly_alarm);
 
     if (0x23 == hourly_alarm.hour)
@@ -485,10 +486,10 @@ hourly_alarm_update (void)
     }
     
     // Clear minutes
-    hourly_alarm.minute = 0x00;
+    hourly_alarm.minute = 0;
 
-    // Reset chime to old value
-    hourly_alarm.second = chime_enabled;
+    // Clear seconds
+    hourly_alarm.second = 0;
 }
 
 void

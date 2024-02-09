@@ -12,9 +12,15 @@
 
 enum global_settings_mode {
     SETTING_CLOCK_FMT,      // 0/1 for 24/12 hour clock format
+    
     SETTING_RTC_OFFSET,     // RTCCAL value
+    
     SETTING_TEMP_CAL_1H,    // Temperature calibration reading at 25C
     SETTING_TEMP_CAL_1L,    // 12-bit value stored as 2 bytes H:L
+    
+    SETTING_UPTIME_H,       // Uptime value stored as days
+    SETTING_UPTIME_L,       // 16-bit stored as 2 bytes H:L
+
     MODE_SETTINGS_MAX
 };
 

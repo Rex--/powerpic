@@ -82,6 +82,17 @@ putch (char data)
     PIE3bits.TX1IE = 1;
 }
 
+unsigned char
+logging_buffer_empty (void)
+{
+    if (sizeof(uart_tx_buffer) == uart_tx_buffer_remaining)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 
 static void
 uart_tx_isr (void)

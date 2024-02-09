@@ -87,6 +87,14 @@
 void    logging_init (void);
 void    putch (char data);
 
+/**
+ * Check if transmit buffer is empty.
+ * 
+ * @returns     1 if buffer is empty, 0 otherwise.
+*/
+unsigned char
+logging_buffer_empty (void);
+
 #endif
 
 // EOF //

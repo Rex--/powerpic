@@ -110,6 +110,15 @@ main (void)
             display_update();
         }
 
+        // If logs are not disabled, wait for the transmit buffer to empty
+        // before going to sleep.
+#       if LOG_LVL
+        while (!logging_buffer_empty() || !TX1STAbits.TRMT)
+        {
+            // Wait for transmit buffer to empty
+        }
+#       endif
+
         // Go to sleep. An interrupt will wake us up when something happens.
         SLEEP();
 

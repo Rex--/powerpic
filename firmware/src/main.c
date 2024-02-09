@@ -77,14 +77,6 @@ main (void)
 
     post_bios();
 
-    // Set a default datetime.
-    // (Eventually we should load this from EEPROM or something)
-    datetime_t fourtwenty = {
-        .date = {0x22, 0x04, 0x20, 0x00},
-        .time = {0x16, 0x19, 0x00},
-    };
-    datetime_set(&fourtwenty);
-
     // Initialize our modes. This calls each mode's init() function. It then
     // starts the default mode (whatever is at mode_list index 0) and configures
     // the system according to the mode's config.

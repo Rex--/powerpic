@@ -19,6 +19,12 @@ rtcc_init (void)
     RTCCONbits.RTCCLKSEL = 0b00;
 #   endif
 
+    // Enable RTCC
+    while (0 == rtcc_status())
+    {
+        rtcc_enable();
+    }
+
     rtcc_writes_disable();
 }
 
@@ -26,12 +32,19 @@ void
 rtcc_date_set (unsigned char year, unsigned char month, 
                 unsigned char day, unsigned char weekday)
 {
+    rtcc_writes_enable();
+    
+    while (rtcc_writes_discouraged())
+    {
+        // Wait for sync bit
+    }
+
     WEEKDAY = weekday;
     DAY = day;
     MONTH = month;
     YEAR = year;
 
-    // rtcc_writes_disable();
+    rtcc_writes_disable();
 }
 
 unsigned char *
@@ -56,13 +69,18 @@ rtcc_date_get (void)
 void
 rtcc_time_set (unsigned char hour, unsigned char minute, unsigned char second)
 {
-    // rtcc_writes_enable();
+    rtcc_writes_enable();
+    
+    while (rtcc_writes_discouraged())
+    {
+        // Wait for sync bit
+    }
 
     SECONDS = second;
     MINUTES = minute;
     HOURS = hour;
 
-    // rtcc_writes_disable();
+    rtcc_writes_disable();
 }
 
 unsigned char *
@@ -97,6 +115,15 @@ rtcc_alarm_date_set (unsigned char month, unsigned char day, unsigned char weekd
 void
 rtcc_alarm_time_set (unsigned char hour, unsigned char minute, unsigned char second)
 {
+    // *NOTE: if a 0 is in the second ones place, the alarm will not
+    // occur, according to Microchip's Errata for the PIC16LF1919x.
+    // The given workaround is to use a SECONDS value of 0x0A for alarms
+    // to occur at 0 seconds. I found it easier to just increment it by 1.
+    if (0 == (second & 0xF))
+    {
+        second++;
+    }
+
     ALRMSEC = second;
     ALRMMIN = minute;
     ALRMHR = hour;

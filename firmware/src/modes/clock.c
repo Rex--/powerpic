@@ -74,8 +74,23 @@ clock_start (void)
     // Draw day of week
     clock_draw_weekday(now.date.weekday);
 
+    // Update display
+    display_update();
+
     // Set tickrate to 1 second
     tick_rate_set_sec(1);
+
+    // Wait for current second to elapse
+    while (SECONDS == now.time.second)
+    {
+        tick_counter_reset();
+    }
+    
+    // Increment seconds
+    now.time.second = (unsigned char)DEC2BCD((BCD2DEC(now.time.second)+1) % 60);
+
+    // Draw time
+    clock_draw_time(&now.time);
 }
 
 signed char
@@ -84,6 +99,9 @@ clock_run (unsigned int event)
     switch (EVENT_TYPE(event))
     {
     case EVENT_TICK:
+        // Increment seconds
+        now.time.second = (unsigned char)DEC2BCD((BCD2DEC(now.time.second)+1) % 60);
+        
         // Sync current time with rtc every minute
         if (0 == now.time.second)
         {
@@ -99,16 +117,9 @@ clock_run (unsigned int event)
             }
         }
 
-        // If the divide key is down, we draw the date
-        if (date_looksie)
+        // If the divide key isn't down, we draw the time
+        if (!date_looksie)
         {
-            // Draw date
-            clock_draw_date(&now.date);
-        }
-        else
-        {
-            // Increment seconds
-            now.time.second = (unsigned char)DEC2BCD((BCD2DEC(now.time.second)+1) % 60);
             // Draw time
             clock_draw_time(&now.time);
         }

@@ -69,7 +69,7 @@ LFLAGS := -O2 -mcodeoffset=${BOOT_OFFSET}
 SOURCES := $(shell find $(SOURCE_DIR) -name '*.c')
 
 # Generate list of p-code object files from sources
-OBJECTS := $(SOURCES:%.c=$(BUILD_DIR)/%.p1)
+OBJECTS := $(SOURCES:$(SOURCE_DIR)/%.c=$(BUILD_DIR)/%.p1)
 
 # Generate list of dependency files
 # DEPENDS := $(SOURCES:%.c=$(BUILD_DIR)/%.d)
@@ -80,7 +80,7 @@ DEPENDS := $(shell find $(BUILD_DIR) -name '*.d')
 # BUILD_FILE_DIRS = $(shell find $(BUILD_DIR) -type d)
 
 # Generate p-code files
-$(BUILD_DIR)/%.p1: %.c Makefile
+$(BUILD_DIR)/%.p1: $(SOURCE_DIR)/%.c Makefile
 	@mkdir -p $(dir $@)
 	@echo "Compiling $<"
 	@$(CC) $(TARGET_ARCH) $(CFLAGS) -I$(INCLUDE_DIR)/ ${FWFLAGS} $< -o $@

@@ -1,6 +1,6 @@
 /** @file display.c
  * 
- * Display library for PowerOS.
+ * Display library for CasiOS.
  * 
  * This file holds generic display functions that apply to all displays.
 */

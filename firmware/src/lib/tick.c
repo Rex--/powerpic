@@ -1,5 +1,5 @@
 /** @file tick.h
- * Tick library for PowerOS.
+ * Tick library for CasiOS.
 */
 
 #include <xc.h>

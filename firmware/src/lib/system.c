@@ -1,6 +1,6 @@
 /** @file system.
  * 
- * System library for PowerOS.
+ * System library for CasiOS.
 */
 
 #include <xc.h>

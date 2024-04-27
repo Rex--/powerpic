@@ -1,4 +1,4 @@
-# PowerOS
+# CasiOS
 The watch firmware is written in C and compiled with Microchip's `xc8` compiler.
 Functionality is separated into 'mode' applications, with each mode implementing
 a set of procedures to be run when active. The active mode is changed by the Mode
@@ -51,7 +51,7 @@ in the config file.
 
 ## Building
 Compilation is achieved with the _make_ utility. A run of the `make fw` command
-will produce a PowerOS.hex file in the sub-directory `build/`. The command
+will produce a CasiOS.hex file in the sub-directory `build/`. The command
 `make clean` will delete all built files, and a `make fclean` will remove all
 files and created directories.
 ```sh
@@ -84,3 +84,8 @@ resetting the watch!
 ```sh
 make upload      # Upload firmware using picchick
 ```
+
+## Copying
+Copyright © 2022-2024 Rex McKinnon \
+This software is released under the University of Illinois/NCSA Open Source
+License. Check the LICENSE file for more details.

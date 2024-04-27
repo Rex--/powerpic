@@ -1,6 +1,6 @@
 /** @file settings.c
  * 
- * Persistent settings lib for PowerOS.
+ * Persistent settings lib for CasiOS.
 */
 
 #include "drivers/nvm.h"

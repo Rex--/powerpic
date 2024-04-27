@@ -1,6 +1,6 @@
 /** @file display_primary.c
  * 
- * Display library for PowerOS
+ * Display library for CasiOS
  * 
  * Functions related to the primary display.
 */

@@ -1,6 +1,6 @@
 /** @file display_secondary.c
  * 
- * Display library for PowerOS
+ * Display library for CasiOS
  * 
  * Functions related to the secondary display.
 */

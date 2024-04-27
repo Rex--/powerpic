@@ -1,6 +1,6 @@
 /** @file display.h
  * 
- * Display library for PowerOS
+ * Display library for CasiOS
  * 
  * This library uses the LCD module in the PIC16LF1919x to drive the casio
  * watch display. It maps ascii characters onto the 7 segment displays based

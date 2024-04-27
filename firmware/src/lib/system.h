@@ -1,6 +1,6 @@
 /** @file system.h
  * 
- * System library for PowerOS.
+ * System library for CasiOS.
  * 
  * This library handles:
  * - Initializing device hardware (System clock, peripherials, default states)

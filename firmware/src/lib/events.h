@@ -1,6 +1,6 @@
 /** @file events.h
  * 
- * Event library for PowerOS.
+ * Event library for CasiOS.
  * 
  * This library implements a FIFO queue for system-wide events.
 */

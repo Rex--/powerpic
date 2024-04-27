@@ -1,5 +1,5 @@
 /** @file isr.c
- * ISR Library for PowerOS.
+ * ISR Library for CasiOS.
 */
 
 #include <xc.h>

@@ -1,5 +1,5 @@
 /** @file isr.h
- * ISR Library for PowerOS.
+ * ISR Library for CasiOS.
  * This library handles all interrupts. For each interrupt generated,
  * the registered 'int_flag's are checked against it's 'int_mask' and the
  * corresponding function is called. It is up to the registered functions to

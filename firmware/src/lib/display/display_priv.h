@@ -1,6 +1,6 @@
 /** @file display_priv.h
  * 
- * Display library for PowerOS
+ * Display library for CasiOS
  * 
  * Private functions for use internally by the display lib.
 */

@@ -1,6 +1,6 @@
 /** @file display_etc.c
  * 
- * Display library for PowerOS
+ * Display library for CasiOS
  * 
  * Functions related to displays that don't contain characters.
 */

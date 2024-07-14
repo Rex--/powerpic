@@ -1,5 +1,5 @@
 /** @file tick.h
- * Tick library for PowerOS.
+ * Tick library for CasiOS.
  * Used to to generate an interrupt at configurable intervals.
  * Each tick < 65535 is ~1ms (1.024kHz)
  *   The external 32.768kHz xtal with a 1:32 prescaler is used for tickrates

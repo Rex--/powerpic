@@ -1,5 +1,5 @@
 /** @file logging.h
- * Logging Library for PowerOS.
+ * Logging Library for CasiOS.
  * This library provides macros to use when logging debug, information,
  * warnings, and errors. In development mode, logs are output via uart to the
  * DEBUG pin. In production mode, logs are stored in a buffer.

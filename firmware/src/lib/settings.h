@@ -1,6 +1,6 @@
 /** @file settings.h
  * 
- * Persistent settings lib for PowerOS.
+ * Persistent settings lib for CasiOS.
  * 
  * Settings are 8-bits in length and are stored in EEPROM. There are 256 bytes
  * available in EEPROM, and currently all are available for settings.

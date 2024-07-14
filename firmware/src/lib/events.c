@@ -1,6 +1,6 @@
 /** @file events.h
  * 
- * Event library for PowerOS.
+ * Event library for CasiOS.
 */
 
 #include <xc.h>

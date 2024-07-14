@@ -1,5 +1,5 @@
 /** @file datetime.c
- * Date and Time library for PowerOS.
+ * Date and Time library for CasiOS.
 */
 
 #include <xc.h>

@@ -1,5 +1,5 @@
 /** @file logging.c
- * Logging Library for PowerOS.
+ * Logging Library for CasiOS.
 */
 
 #include <xc.h>

@@ -1,5 +1,5 @@
 /** @file datetime.h
- * Date and Time library for PowerOS.
+ * Date and Time library for CasiOS.
  * All values are in BCD format.
 */
 

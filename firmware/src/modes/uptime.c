@@ -97,7 +97,7 @@ uptime_run (unsigned int event)
 
             // Re-register uptime alarm
             alarm_del_event(UPTIME_ALARM_EVENT);
-            alarm_set_time(&midnight);
+            alarm_set_time(&midnight, UPTIME_ALARM_EVENT);
         break;
 
         case BUTTON_ADJ_RELEASE:

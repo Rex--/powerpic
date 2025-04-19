@@ -36,9 +36,8 @@
 #   define KEYPAD_COLUMN_2         PORTCbits.RC6   // col 2 - RC6
 #   define KEYPAD_COLUMN_3         PORTCbits.RC7   // col 3 - RC7
 #   define KEYPAD_COLUMN_INTF      IOCCF
-#endif
 
-#if (2 <= PCB_REV)
+#else // (2 <= PCB_REV)
 #   define KEYPAD_COLUMN_MASK      0xCC
 #   define KEYPAD_COLUMN_PORT      PORTC    
 #   define KEYPAD_COLUMN_0         PORTCbits.RC6   // col 0 - RC6
@@ -191,6 +190,9 @@ keypad_isr (void)
                 //
                 pin_set_low(KEYPAD_ROW_LAT, row);
 
+                // Wait for row to go low
+                NOP();
+
                 // Check columns.
                 //
                 if (0 < (~KEYPAD_COLUMN_PORT & KEYPAD_COLUMN_MASK))
@@ -217,6 +219,7 @@ keypad_isr (void)
                         // Keycodes are 0-15 starting from the top left going right
                         //
                         keypad_keypress((unsigned char)((row * 4) + column));
+                        break; // Break at the first pressed key
                     }
                 }
             }

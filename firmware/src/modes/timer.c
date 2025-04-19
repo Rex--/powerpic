@@ -51,6 +51,21 @@ static timer_run_t timer_run_funcs[TIMER_MAX_TIMERS] = {
 
 static unsigned char timer_type = 0;
 
+//// Variables for stopwatch timer ////
+
+static signed char timer_stopwatch_active = 0;
+
+// The time the stopwatch was started
+static datetime_t timer_stopwatch_begin = {0,0,0};
+
+// The time of the current stopwatch
+static time_t timer_stopwatch_time = {0,0,0};
+// The number of days stopwatch has been running
+static unsigned int timer_stopwatch_day = 0;
+
+// A time object representing one second
+static time_t timer_stopwatch_second = {0,0,1};
+
 
 
 //// Variables for countdown timer ////
@@ -119,8 +134,15 @@ timer_stopwatch_start (void)
     // the letter 'T', but we use additional segments
 
     // Display 00:00 00 on screen
-    display_primary_string(1, "00 00 00");
+    // display_primary_string(1, "00 00 00");
     display_period(DISPLAY_PERIOD_COLON);
+
+    timer_display_time(&timer_stopwatch_time);
+
+    if (0 < timer_stopwatch_active)
+    {
+        tick_rate_set_sec(1);
+    }
 }
 
 
@@ -214,24 +236,68 @@ timer_stopwatch_run (unsigned int event)
     {
 
     case EVENT_TICK:
-        // if (stopwatch_active)
-        // {
+        if (timer_stopwatch_active)
+        {
+            // Add one second
+            if (timer_add_time(&timer_stopwatch_time, &timer_stopwatch_second)) {
+                // Add one day
+                timer_stopwatch_day++;
+            }
 
-        // }
+            timer_display_time(&timer_stopwatch_time);
+        }
     break;
 
     case KEYPAD_EVENT_PRESS:
         if (EVENT_DATA(event) == '+')
         {
             // Plus key starts/stops stopwatch
+            if (0 != timer_stopwatch_active)
+            {
+                if (0 > timer_stopwatch_active)
+                {
+                    // Stopwatch is paused, restart it
+                    timer_stopwatch_active = 1;
+                    tick_rate_set_sec(1);
+                }
+                else
+                {
+                    // Stopwatch is ticking, pause it 
+                    timer_stopwatch_active = -1;
+                    tick_disable();
+                }
+            }
+            else
+            {
+                // Start stopwatch
+                // Save date and time stopwatch was started
+                datetime_now(&timer_stopwatch_begin);
+                // Set stopwatch active
+                timer_stopwatch_active = 1;
+                tick_rate_set_sec(1);
+            }
         }
         if (EVENT_DATA(event) == '0')
         {
-            // 0 is Lap key
+            if (timer_stopwatch_active)
+            {
+                // 0 is Lap key when timer is active
+            }
+            else
+            {
+                // 0 is reset key when timer inactive
+                // Clear stopwatch time
+                timer_stopwatch_time.hour = 0;
+                timer_stopwatch_time.minute = 0;
+                timer_stopwatch_time.second = 0;
+                timer_stopwatch_day = 0;
+            }
+
         }
         if (EVENT_DATA(event) == '/')
         {
             // Divide key shows hours
+            // or should it be days? (we don't do ms)
         }
     break;
     

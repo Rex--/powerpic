@@ -28,10 +28,6 @@ buzzer_init (void)
     LOG_INFO("Initializing buzzer...");
     // Initialize our pwm driver. This configures it for our buzzer.
     pwm_init();
-
-    // Register ISR
-    // Should this be done only when we are playing a tone?
-    isr_register(4, _PIR4_TMR2IF_MASK, &buzzer_isr);
 }
 
 void
@@ -58,6 +54,8 @@ buzzer_tone (unsigned int frequency, unsigned char volume, unsigned int duration
 }
 
 
+static signed char tone_isr;
+
 void
 buzzer_tone2 (unsigned int frequency, unsigned char volume, unsigned int duration)
 {
@@ -76,7 +74,8 @@ buzzer_tone2 (unsigned int frequency, unsigned char volume, unsigned int duratio
     LOG_DEBUG("Timer Duration: %f", timer_duration);
     LOG_DEBUG("Tone Duration: %i", tone_duration);
     
-    // enable interrupt
+    // Register interrupt handler and enable interrupt
+    tone_isr = isr_register(4, _PIR4_TMR2IF_MASK, &buzzer_isr);
     PIE4bits.TMR2IE = 1;
 
     // start tone
@@ -312,11 +311,12 @@ buzzer_isr (void)
     if (tone_duration <= played_duration)
     {
         // stop tone
-        // pwm_disable();
-        PWM4CONbits.PWM4EN = 0;
+        pwm_disable();
+        // PWM4CONbits.PWM4EN = 0;
 
-        // Disable interrupt
+        // Disable interrupt and unregister handler
         PIE4bits.TMR2IE = 0;
+        isr_unregister(tone_isr);
     }
     else
     {

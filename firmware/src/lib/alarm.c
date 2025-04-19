@@ -43,6 +43,7 @@ static void alarm_isr (void);
 void
 alarm_init (void)
 {
+    LOG_INFO("Initializing alarm...");
     registered_alarms_count = 0;
     registered_alarms_head = 0;
 

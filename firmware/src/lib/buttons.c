@@ -14,6 +14,8 @@
 
 #include "lib/buttons.h"
 
+#include "lib/logging.h"
+
 #define DEBOUNCE_PERIOD 10
 
 static unsigned char button_mode_pressed = 0;
@@ -27,6 +29,7 @@ static void     buttons_isr (void);
 void
 buttons_init (void)
 {
+    LOG_INFO_TAG("lib.buttons", "Initializing buttons...");
     button_mode_pressed = 0;
     button_adj_pressed = 0;
     last_event_time = 0;

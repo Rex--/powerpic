@@ -12,6 +12,9 @@
 #include "lib/isr.h"
 #include "lib/events.h"
 
+#define LOG_TAG "lib.keypad"
+#include "lib/logging.h"
+
 #include "lib/keypad.h"
 
 
@@ -64,6 +67,7 @@ void keypad_isr (void);
 void
 keypad_init (void)
 {
+    LOG_INFO("Initializing keypad...");
     // Setup default state
     //
     keypad_lastkey = 0;

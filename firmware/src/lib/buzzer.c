@@ -25,6 +25,7 @@ static void buzzer_isr (void);
 void
 buzzer_init (void)
 {
+    LOG_INFO("Initializing buzzer...");
     // Initialize our pwm driver. This configures it for our buzzer.
     pwm_init();
 

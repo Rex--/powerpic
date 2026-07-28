@@ -6,11 +6,12 @@ a LCD controller for driving the stock Casio display, and a 10-bit PWM for drivi
 the piezo buzzer. Some additional useful features are: a 12-bit ADC for roughly
 determining battery level, and a temperature sensor for roughly gauging temperature.
 
-The only other components besides the required passives are a 32.768kHz crystal,
-and a LED that is used for the backlight.
-
 
 ## Changelog
+
+**Version 2.1**
+- Added POGO pin for buzzer + to replace the spring.
+- Added POGO pin for buzzer - to replace ground tab.
 
 **Version 2.0**
 - Added experimental backlight.

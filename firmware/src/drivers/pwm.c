@@ -35,10 +35,8 @@ pwm_init (void)
     RG7PPS = 0x0c;
 
 #   else
-    // Set PWM pin as output
     // We use RG6 for the buzzer
     //
-    TRISGbits.TRISG6 = 0;
     RG6PPS = 0x0C;
 #   endif
 
@@ -53,6 +51,9 @@ pwm_init (void)
 void
 pwm_enable (void)
 {
+    // Set PWM pin as output
+    TRISGbits.TRISG6 = 0;
+
     // Enable timer
     timer4_start(); 
 
@@ -63,6 +64,9 @@ pwm_enable (void)
 void
 pwm_disable (void)
 {
+    // Reset PWM pin as input
+    TRISGbits.TRISG6 = 1;
+    
     // Disable pwm
     PWM4CONbits.PWM4EN = 0;
 

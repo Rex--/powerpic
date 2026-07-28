@@ -6,7 +6,7 @@
  * be edited manually. To configure which modes are compiled into the firmware,
  * edit the 'modes.cfg' file.
  * 
- * The generated source file is located in src/modes/mode_config.h
+ * The generated source file is located at src/modes/mode_config.h
 */
 
 #ifndef _mode_config_template_h_

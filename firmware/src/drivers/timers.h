@@ -81,7 +81,9 @@ void    timer0_init (void);
 
 
 /**
- * Initialize timer1
+ * Initialize timer1 to use the 32.786 kHz crystal with a 1:8 pre-scaler.
+ * This gives a timer frequency of 4096 Hz.
+ * 1ms == ~4 counts
 */
 void    timer1_init (void);
 

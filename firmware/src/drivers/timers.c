@@ -42,8 +42,8 @@ void
 timer1_init (void)
 {
     T1CONbits.CKPS = 0b11;  // 1:8 prescaler
-    // T1CONbits.nSYNC = 0; // Synchronized with Fosc
-    T1CLKbits.CS = 0b0010; // Set clock source to Fosc
+    T1CLKbits.CS = 0b0111; // Set clock source to SOSC
+    T1CONbits.nSYNC = 1; // Not synched with Fosc
 }
 
 void

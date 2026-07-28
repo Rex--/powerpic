@@ -16,13 +16,15 @@
 
 #include "lib/logging.h"
 
-#define DEBOUNCE_PERIOD 10
+
+#define DEBOUNCE_PERIOD ((unsigned)(50 * 4)) // (ms * timer1_counts)
 
 static unsigned char button_mode_pressed = 0;
 static unsigned char button_adj_pressed  = 0;
 
-// Timer1 timestamp of last event
-static unsigned int last_event_time = 0;
+// Timer1 timestamp of last button presses
+static unsigned int last_mode_time = 0;
+static unsigned int last_adj_time = 0;
 
 static void     buttons_isr (void);
 
@@ -32,7 +34,8 @@ buttons_init (void)
     LOG_INFO_TAG("lib.buttons", "Initializing buttons...");
     button_mode_pressed = 0;
     button_adj_pressed = 0;
-    last_event_time = 0;
+    last_mode_time = 0;
+    last_adj_time = 0;
 
     // Init timer
     timer1_init();
@@ -40,7 +43,7 @@ buttons_init (void)
     // Start timer
     // TODO: We should only start the timer when a button (or keypad) is down
     timer1_start();
-    
+
 
     // Disable IOC interrupts while configuring pins.
     //
@@ -115,23 +118,22 @@ buttons_isr (void)
     {
         if (BUTTON_MODE)
         {
-            if (1 == button_mode_pressed && (timer1_get() - last_event_time) > DEBOUNCE_PERIOD)
+            if (1 == button_mode_pressed && ((unsigned)(timer1_get() - last_mode_time) > DEBOUNCE_PERIOD))
             {
                 // Release event
                 //
-                last_event_time = timer1_get();
+                last_mode_time = timer1_get();
                 event_isr(EVENT_ID(EVENT_BUTTON, BUTTON_MODE_RELEASE));
                 button_mode_pressed = 0;
             }
         }
         else
         {
-            // Always detect push events if button is not already pressed
-            if (0 == button_mode_pressed)
+            if (0 == button_mode_pressed && ((unsigned)(timer1_get() - last_mode_time) > DEBOUNCE_PERIOD))
             {
                 // Press event
                 //
-                last_event_time = timer1_get();
+                last_mode_time = timer1_get();
                 event_isr(EVENT_ID(EVENT_BUTTON, BUTTON_MODE_PRESS));
                 button_mode_pressed = 1;
             }
@@ -143,20 +145,20 @@ buttons_isr (void)
     //
     if (BUTTON_ADJ_INT)
     {
-        if (BUTTON_ADJ)
+        if (BUTTON_ADJ) // Release
         {
-            if (1 == button_adj_pressed && (timer1_get() - last_event_time) > DEBOUNCE_PERIOD)
+            if (1 == button_adj_pressed && ((unsigned)(timer1_get() - last_adj_time) > DEBOUNCE_PERIOD))
             {
-                last_event_time = timer1_get();
+                last_adj_time = timer1_get();
                 event_isr(EVENT_ID(EVENT_BUTTON, BUTTON_ADJ_RELEASE));
                 button_adj_pressed = 0;
             }
         }
-        else
+        else            // Press
         {
-            if (0 == button_adj_pressed)
+            if (0 == button_adj_pressed && ((unsigned)(timer1_get() - last_mode_time) > DEBOUNCE_PERIOD))
             {
-                last_event_time = timer1_get();
+                last_adj_time = timer1_get();
                 event_isr(EVENT_ID(EVENT_BUTTON, BUTTON_ADJ_PRESS));
                 button_adj_pressed = 1;
             }

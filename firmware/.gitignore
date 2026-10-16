@@ -1,2 +1,5 @@
 build/
 vendor/
+
+# Generated mode build config
+src/modes/mode_config.h

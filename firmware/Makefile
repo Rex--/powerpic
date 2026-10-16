@@ -29,7 +29,7 @@ DTINIT := $(DT_DATE) $(DT_TIME)
 #    Project Configuration    #  
 
 ## The name of the project
-TARGET := PowerOS
+TARGET := CasiOS
 
 ## The device to compile for
 MCU := 16LF19197
@@ -68,19 +68,21 @@ TARGET_ARCH := -mcpu=$(MCU)
 
 ## Device Family Pack
 DFP := PIC16F1xxxx_DFP
-DFP_DIR := $(VENDOR_DIR)/microchip/$(DFP)
-DFP_URL := https://packs.download.microchip.com/Microchip.PIC16F1xxxx_DFP.1.31.465.atpack
+DFP_VER := 1.32.471
+DFP_DIR := $(VENDOR_DIR)/Microchip
+DFP_PKG = $(DFP_DIR)/$(DFP).$(DFP_VER)
+DFP_URL := https://packs.download.microchip.com/Microchip.$(DFP).$(DFP_VER).atpack
 
 ## Firmware build options
 FWFLAGS = -D_XTAL_FREQ=${XTAL_FREQ} -DPCB_REV=${PCB_REV} -DLOG_LVL=$(LOG_LVL) $(DTINIT)
 
-DFPFLAGS := -mdfp=$(DFP_DIR)/xc8
+DFPFLAGS := -mdfp=$(DFP_PKG)/xc8
 
 ## Options for the xc8 compiler
-CFLAGS := -c -O3
+CFLAGS := -c -O2
 
 ## Options for xc8 compiler linker
-LFLAGS := -O3 -mcodeoffset=${BOOT_OFFSET}
+LFLAGS := -O2 -mcodeoffset=${BOOT_OFFSET}
 
 ################################################################################
 #    User Config Override    #
@@ -122,7 +124,7 @@ $(BUILD_DIR)/%.p1: $(SOURCE_DIR)/%.c Makefile
 ## Generate bin files (.hex and .elf)
 # Note: This command builds everythings,
 # maybe we can find a way to split up the actions.
-$(BUILD_DIR)/$(TARGET).hex: $(DFP_DIR) $(MODE_CONFIG) $(OBJECTS) Makefile
+$(BUILD_DIR)/$(TARGET).hex: $(DFP_PKG) $(MODE_CONFIG) $(OBJECTS) Makefile
 	@mkdir -p $(dir $@)
 	@echo "Building hexfile..."
 	@$(CC) $(TARGET_ARCH) $(DFPFLAGS) $(LFLAGS) $(OBJECTS) -o $@
@@ -141,13 +143,12 @@ $(MODE_CONFIG): $(MODE_FILE) $(MODE_CONFIG_TEMPLATE) Makefile
 	> $(MODE_CONFIG)
 
 ## Download and extract Device Family Pack
-$(DFP_DIR):
-	@echo "Downloading PIC16F1xxxx_DFP..."
-	@mkdir -p $(BUILD_DIR)
-	@curl --progress-bar -o $(BUILD_DIR)/$(DFP).atpack $(DFP_URL)
-	@echo -n "Extracting PIC16F1xxxx_DFP"
+$(DFP_PKG):
+	@echo "Downloading $(DFP) v$(DFP_VER)"
 	@mkdir -p $(DFP_DIR)
-	@unzip $(BUILD_DIR)/$(DFP).atpack -d $(VENDOR_DIR)/microchip/$(DFP) | awk 'BEGIN {ORS="."} {if(NR%50==0)print "."}'
+	@curl --progress-bar --fail-with-body -o $(DFP_PKG).atpack $(DFP_URL)
+	@echo "Extracting $(DFP)"
+	@unzip $(DFP_PKG).atpack -d $(DFP_PKG) | awk 'BEGIN {ORS="."} {if(NR%50==0)print "."}'
 	@echo "done"
 
 
@@ -220,6 +221,7 @@ info:
 	@echo $(SOURCES)
 	@echo "Objects:"
 	@echo $(OBJECTS)
+	@echo $(DFP_PKG)
 
 help:
 	@echo "'make [fw]'   - Build firmware"

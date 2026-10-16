@@ -42,7 +42,7 @@ setup (void)
     system_init();
 
     // Init logging lib so it is available for use by libs.
-    logging_init();
+    // logging_init();
 
     // Initialize peripheral libraries:
     // - Timers     (tick.h)
